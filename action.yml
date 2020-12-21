@@ -5,6 +5,9 @@ branding:
   icon: circle
   color: red
 inputs:
+  org_token:
+    description: "Github Access Token with org level permissions"
+    required: true
   org:
     description: "The name of the org in which to check for the self hosted runner"
     required: true

@@ -7,8 +7,10 @@ import * as github from '@actions/github';
 
 export async function run() {
   try {
-    // Get authenticated GitHub client (Ocktokit): https://github.com/actions/toolkit/tree/master/packages/github#usage
-    const octokit = github.getOctokit(process.env.ORG_TOKEN)
+    const orgToken = core.getInput('org_token', { required: true });
+
+    // Get authenticated GitHub client (Ocktokit): https://github.com/actions/toolkit/tree/master/packages/github#usage-
+    const octokit = github.getOctokit(orgToken);
     // const github = new GitHub(process.env.GITHUB_TOKEN);
 
     const org = core.getInput('org', { required: true });
@@ -19,6 +21,8 @@ export async function run() {
     const selfHostedRunnersListResponse = await octokit.actions.listSelfHostedRunnersForOrg({
       org,
     });
+
+    core.debug(JSON.stringify(selfHostedRunnersListResponse));
 
     // Get the total_count of the self hosted runners from the response
     const {

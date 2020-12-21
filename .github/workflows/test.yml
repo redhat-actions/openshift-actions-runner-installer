@@ -13,9 +13,8 @@ jobs:
         id: check-runner
         uses: ./
         with:
+          org_token: ${{ secrets.ORG_TOKEN }}
           org: redhat-actions
-        env:
-          ORG_TOKEN: ${{ secrets.ORG_TOKEN }}
 
       - name: Display result
         run: echo "Runner present:" ${{ steps.check-runner.outputs.runner_present }}
