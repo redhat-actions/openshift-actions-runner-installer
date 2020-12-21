@@ -8,7 +8,7 @@ import * as github from '@actions/github';
 export async function run() {
   try {
     // Get authenticated GitHub client (Ocktokit): https://github.com/actions/toolkit/tree/master/packages/github#usage
-    const octokit = github.getOctokit(process.env.GITHUB_TOKEN)
+    const octokit = github.getOctokit(process.env.ORG_TOKEN)
     // const github = new GitHub(process.env.GITHUB_TOKEN);
 
     const org = core.getInput('org', { required: true });
