@@ -1,0 +1,24 @@
+{
+  "name": "check-self-hosted-runner",
+  "version": "1.0.0",
+  "engines": {
+    "node": "12"
+  },
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "compile": "tsc -p .",
+    "bundle": "ncc build src/index.ts --source-map --minify",
+    "clean": "rm -rf lib/ dist/"
+  },
+  "keywords": [],
+  "author": "Red Hat Inc.",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "@actions/github": "^4.0.0",
+    "@octokit/action": "^3.1.6",
+    "@types/node": "^14.14.14",
+    "@vercel/ncc": "^0.26.1"
+  }
+}

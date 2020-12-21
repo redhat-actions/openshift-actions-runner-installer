@@ -1,0 +1,16 @@
+name: "Check Self Hosted Runners"
+description: "Check whether self hosted runner is present in org"
+author: "Red Hat"
+branding:
+  icon: circle
+  color: red
+inputs:
+  org:
+    description: "The name of the org in which to check for the self hosted runner"
+    required: true
+outputs:
+  runner_present:
+    description: "Boolean value which signifies the presence of self hosted runner"
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
