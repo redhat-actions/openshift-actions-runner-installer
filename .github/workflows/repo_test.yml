@@ -4,7 +4,7 @@ on: [push, workflow_dispatch]
 jobs:
   test-action-job:
     runs-on: ubuntu-latest
-    name: Check if self hosted runner is present in org
+    name: Check if self hosted runner is present in repo
     steps:
       - name: Checkout action
         uses: actions/checkout@v2
@@ -14,7 +14,6 @@ jobs:
         uses: ./
         with:
           github_token: ${{ secrets.REPO_TOKEN }}
-          repository_path: divyansh42/s2i-build
 
       - name: Display result
         run: echo "Runner present:" ${{ steps.check-runner.outputs.runner_present }}

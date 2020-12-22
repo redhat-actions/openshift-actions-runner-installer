@@ -13,7 +13,7 @@ export async function run() {
     const octokit = github.getOctokit(githubToken);
     // const github = new GitHub(process.env.GITHUB_TOKEN);
 
-    const repositoryPath = core.getInput('repository_path', { required: true });
+    const repositoryPath = core.getInput('repository_path', { required: true }) || `${github.context.repo.owner}/${github.context.repo.repo}`;
 
     const index = repositoryPath.indexOf('/');
 

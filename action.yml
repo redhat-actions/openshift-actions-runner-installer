@@ -9,8 +9,11 @@ inputs:
     description: "Github Access Token with org and repo level permissions"
     required: true
   repository_path:
-    description: "The repo path in which to check for the self hosted runner. It can also take the name of the org"
-    required: true
+    description: |
+      "Repository name with owner. For example, redhat-actions/check-self-hosted-runner. 
+      It can also take the name of the org. For example , redhat-actions"
+    default: ${{ github.repository }}
+    required: false
 outputs:
   runner_present:
     description: "Boolean value which signifies the presence of self hosted runner"
