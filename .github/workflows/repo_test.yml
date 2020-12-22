@@ -8,13 +8,13 @@ jobs:
     steps:
       - name: Checkout action
         uses: actions/checkout@v2
-
+      
       - name: Check self hosted runner
         id: check-runner
         uses: ./
         with:
-          github_token: ${{ secrets.ORG_TOKEN }}
-          repository_path: redhat-actions
+          github_token: ${{ secrets.REPO_TOKEN }}
+          repository_path: divyansh42/s2i-build
 
       - name: Display result
         run: echo "Runner present:" ${{ steps.check-runner.outputs.runner_present }}

@@ -1,0 +1,20 @@
+name: Test
+on: [push, workflow_dispatch]
+
+jobs:
+  test-action-job:
+    runs-on: ubuntu-latest
+    name: Check if self hosted runner is present in org
+    steps:
+      - name: Checkout action
+        uses: actions/checkout@v2
+      
+      - name: Check self hosted runner
+        id: check-runner
+        uses: ./
+        with:
+          github_token: ${{ secrets.ORG_TOKEN }}
+          repository_path: redhat-actions
+
+      - name: Display result
+        run: echo "Runner present:" ${{ steps.check-runner.outputs.runner_present }}
