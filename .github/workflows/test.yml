@@ -13,8 +13,8 @@ jobs:
         id: check-runner
         uses: ./
         with:
-          org_token: ${{ secrets.ORG_TOKEN }}
-          org: redhat-actions
+          github_token: ${{ secrets.ORG_TOKEN }}
+          repository_path: redhat-actions
 
       - name: Display result
         run: echo "Runner present:" ${{ steps.check-runner.outputs.runner_present }}

@@ -5,11 +5,11 @@ branding:
   icon: circle
   color: red
 inputs:
-  org_token:
-    description: "Github Access Token with org level permissions"
+  github_token:
+    description: "Github Access Token with org and repo level permissions"
     required: true
-  org:
-    description: "The name of the org in which to check for the self hosted runner"
+  repository_path:
+    description: "The repo path in which to check for the self hosted runner. It can also take the name of the org"
     required: true
 outputs:
   runner_present:

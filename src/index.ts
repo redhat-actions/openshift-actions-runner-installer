@@ -1,3 +1,8 @@
 import { run } from './getSelfHostedRunner';
+import * as core from '@actions/core';
 
-run();
+run()
+.then(() => {
+    core.info("Success.");
+})
+.catch(core.setFailed);
