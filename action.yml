@@ -14,6 +14,9 @@ inputs:
       It can also take the name of the org. For example , redhat-actions"
     default: ${{ github.repository }}
     required: false
+  labels:
+    description: "Labels in the runners to check for. For multiple labels, add all seperated by a single space"
+    required: false
 outputs:
   runner_present:
     description: "Boolean value which signifies the presence of self hosted runner"

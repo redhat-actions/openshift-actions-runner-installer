@@ -29,27 +29,65 @@ export async function run() {
         repo,
       });
     } else {
+      // Get Self Hosted Runners
+      // API Documentation: https://docs.github.com/en/free-pro-team@latest/rest/reference/actions#self-hosted-runners
+      // Octokit Documentation: https://octokit.github.io/rest.js/v17#actions-list-self-hosted-runners-for-org
       org = repositoryPath;
       selfHostedRunnersListResponse = await octokit.actions.listSelfHostedRunnersForOrg({
         org,
       });
     }
 
-    // Get Self Hosted Runners
-    // API Documentation: https://docs.github.com/en/free-pro-team@latest/rest/reference/actions#self-hosted-runners
-    // Octokit Documentation: https://octokit.github.io/rest.js/v17#actions-list-self-hosted-runners-for-org
-
     core.debug(JSON.stringify(selfHostedRunnersListResponse));
 
     // Get the total_count of the self hosted runners from the response
     const {
-      data: { total_count: totalCount }
+      data: { total_count: totalCount, runners: runners }
     } = selfHostedRunnersListResponse
 
     let isRunnerPresent = false;
 
-    if (totalCount > 0) {
-      isRunnerPresent = true;
+    const labels = core.getInput('labels', { required: false })
+
+    let inputLabels = null;
+
+    if (labels === "") {
+      core.debug("Labels not provided.");
+      
+      if (totalCount > 0) {
+        isRunnerPresent = true;
+      }
+    } else {
+      inputLabels = labels.split(",");
+      console.log("Labels to check for: " + inputLabels);
+
+      let labelFound: boolean = true;
+
+      runners.forEach((runner) => {
+
+        labelFound = true;
+        let runnerLabels = [];
+
+        runner.labels.forEach(runnerLabel => {
+          runnerLabels.push(runnerLabel.name);
+        });
+
+        inputLabels.forEach((inputLabel: string) => {
+          if (!runnerLabels.includes(inputLabel)) {
+            labelFound = false;
+            return;
+          }
+        });
+
+        if(labelFound === true) {
+          return;
+        }
+      });
+
+      if (labelFound === true) {
+        console.log("Runner found with the desired labels")
+        isRunnerPresent = true;
+      }
     }
 
     core.setOutput('runner_present', isRunnerPresent);

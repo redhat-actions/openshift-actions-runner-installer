@@ -13,6 +13,8 @@ jobs:
         id: check-runner
         uses: ./
         with:
+          repository_path: divyansh42/s2i-build
+          labels: rhel-8,label-1
           github_token: ${{ secrets.REPO_TOKEN }}
 
       - name: Display result
