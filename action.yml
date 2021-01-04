@@ -15,7 +15,7 @@ inputs:
     default: ${{ github.repository }}
     required: false
   labels:
-    description: "Labels in the runners to check for. For multiple labels, add all seperated by a single space"
+    description: "Labels in the runners to check for. For multiple labels, add all seperated by a comma(,) "
     required: false
 outputs:
   runner_present:
