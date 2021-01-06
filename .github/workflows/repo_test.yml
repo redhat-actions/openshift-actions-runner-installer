@@ -1,4 +1,4 @@
-name: Test
+name: Test self hosted runner in repo
 on: [push, workflow_dispatch]
 
 jobs:
