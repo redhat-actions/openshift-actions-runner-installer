@@ -7,6 +7,7 @@ import * as github from "@actions/github";
 export async function run() {
   try {
     const githubToken = core.getInput("github_token", { required: true });
+    const labels = core.getInput("labels", { required: false });
 
     // Get authenticated GitHub client (Ocktokit): https://github.com/actions/toolkit/tree/master/packages/github#usage-
     const octokit = github.getOctokit(githubToken);
@@ -29,10 +30,6 @@ export async function run() {
 
     let isRunnerPresent = false;
 
-    const labels = core.getInput("labels", { required: false });
-
-    let inputLabels = null;
-
     // Check if labels are provided or not
     if (labels === "") {
       core.debug("Labels not provided.");
@@ -40,8 +37,8 @@ export async function run() {
         isRunnerPresent = true;
       }
     } else {
-      inputLabels = labels.split(",");
-      
+      const inputLabels = labels.split(",");
+
       // Check if runner is present with the desired labels
       isRunnerPresent = await checkLabelExists(runners, inputLabels);
       console.log("Labels to check for: " + inputLabels);
@@ -53,6 +50,7 @@ export async function run() {
   }
 }
 
+// Get Self Hosted Runners
 async function listSelfHostedRunners(octokit, repositoryPath) {
   const index = repositoryPath.indexOf("/");
   let org = "";
@@ -60,6 +58,8 @@ async function listSelfHostedRunners(octokit, repositoryPath) {
   let repo = "";
   let selfHostedRunnersListResponse = null;
   if (index !== -1) {
+    // API Documentation: https://docs.github.com/en/free-pro-team@latest/rest/reference/actions#self-hosted-runners
+    // Octokit Documentation: https://octokit.github.io/rest.js/v17#actions-list-self-hosted-runners-for-repo
     owner = repositoryPath.substring(0, index);
     repo = repositoryPath.substring(index + 1);
     selfHostedRunnersListResponse = await octokit.actions.listSelfHostedRunnersForRepo(
@@ -69,8 +69,6 @@ async function listSelfHostedRunners(octokit, repositoryPath) {
       }
     );
   } else {
-    // Get Self Hosted Runners
-    // API Documentation: https://docs.github.com/en/free-pro-team@latest/rest/reference/actions#self-hosted-runners
     // Octokit Documentation: https://octokit.github.io/rest.js/v17#actions-list-self-hosted-runners-for-org
     org = repositoryPath;
     selfHostedRunnersListResponse = await octokit.actions.listSelfHostedRunnersForOrg(
