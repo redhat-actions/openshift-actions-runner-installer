@@ -1,10 +1,10 @@
-name: Test self-hosted runner in repo
+name: Test self-hosted runner in org
 on: [ push, workflow_dispatch ]
 
 jobs:
   test-action-job:
     runs-on: ubuntu-20.04
-    name: Check for repo runner
+    name: Check for org runner
     steps:
       - name: Checkout action
         uses: actions/checkout@v2
@@ -13,9 +13,8 @@ jobs:
         id: check_runner
         uses: ./
         with:
-          runner_location: ${{ github.repository }}
-          github_pat: ${{ secrets.REPO_TOKEN }}
-          labels: rhel-8,label-1
+          runner_location: redhat-actions
+          github_pat: ${{ secrets.ORG_TOKEN }}
 
-      - run:  |
+      - run: |
           echo "Runner exists: ${{ steps.check_runner.outputs.runner_present }}"

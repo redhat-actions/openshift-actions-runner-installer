@@ -1,25 +1,29 @@
 name: "Check Self Hosted Runners"
-description: "Check whether self hosted runner is present in org"
+description: "Check whether a self-hosted runner exists in the given repository or organization."
 author: "Red Hat"
 branding:
   icon: circle
   color: red
 inputs:
-  github_token:
-    description: "Github Access Token with org and repo level permissions"
+  github_pat:
+    description: "GitHub Personal Access Token with org and repo level permissions"
     required: true
-  repository_path:
+  runner_location:
     description: |
-      "Repository name with owner. For example, redhat-actions/check-self-hosted-runner. 
-      It can also take the name of the org. For example , redhat-actions"
-    default: ${{ github.repository }}
+      Repository or org to check for the self-hosted runner.
+      For example, "redhat-actions/check-self-hosted-runner", or just "redhat-actions" to check at the org level.
+      Defaults to the current repository.
     required: false
   labels:
-    description: "Labels in the runners to check for. For multiple labels, add all seperated by a comma(,) "
+    description: Labels in the runners to check for. For multiple labels, separate by comma. For example, "label1,label2".
     required: false
+  fail_if_not_found:
+    description: If true, fail the workflow if a matching runner is not found.
+    required: false
+    default: "false"
 outputs:
   runner_present:
-    description: "Boolean value which signifies the presence of self hosted runner"
+    description: "Boolean which signifies the presence of a matching self hosted runner."
 runs:
   using: 'node12'
   main: 'dist/index.js'
