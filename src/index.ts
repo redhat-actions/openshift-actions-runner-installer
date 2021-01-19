@@ -1,8 +1,5 @@
-import { run } from './getSelfHostedRunner';
-import * as core from '@actions/core';
+import * as core from "@actions/core";
+import { run } from "./getSelfHostedRunner";
 
 run()
-.then(() => {
-    core.info("Success.");
-})
-.catch(core.setFailed);
+    .catch(core.setFailed);

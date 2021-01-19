@@ -9,18 +9,25 @@
   "scripts": {
     "compile": "tsc -p .",
     "bundle": "ncc build src/index.ts --source-map --minify",
-    "clean": "rm -rf lib/ dist/"
+    "clean": "rm -rf lib/ dist/",
+    "lint": "eslint . --max-warnings=0"
   },
   "keywords": [],
   "author": "Red Hat Inc.",
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.2.6",
-    "@actions/github": "^4.0.0",
-    "@octokit/action": "^3.1.6",
-    "@types/node": "^14.14.14",
-    "@typescript-eslint/eslint-plugin": "^4.11.0",
-    "@vercel/ncc": "^0.26.1",
-    "typescript": "^4.0.5"
+    "@actions/github": "^4.0.0"
+  },
+  "devDependencies": {
+    "@redhat-actions/action-io-generator": "^1.2.0",
+    "@redhat-actions/eslint-config": "^1.2.3",
+    "@redhat-actions/tsconfig": "^1.1.0",
+    "@types/node": "^12.19.14",
+    "@typescript-eslint/eslint-plugin": "^4.13.0",
+    "@typescript-eslint/parser": "^4.13.0",
+    "@vercel/ncc": "^0.27.0",
+    "eslint": "^7.18.0",
+    "typescript": "^4.1.3"
   }
 }
