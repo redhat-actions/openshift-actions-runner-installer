@@ -12,9 +12,10 @@ import { getMatchingRunners } from "./get-runners";
 
 export async function run(): Promise<void> {
     const runnerConfig = processInputs();
+    const taggedImage = `${runnerConfig.image}:${runnerConfig.tag}`;
 
     const matchingRunners = await getMatchingRunners(
-        runnerConfig.githubPat, runnerConfig.runnerLocation, runnerConfig.runnerLabels,
+        runnerConfig.githubPat, runnerConfig.runnerLocation, runnerConfig.runnerLabels.concat(taggedImage),
     );
 
     if (matchingRunners && matchingRunners.length > 0) {
@@ -28,7 +29,7 @@ export async function run(): Promise<void> {
         return;
     }
 
-    core.info(`A matching runner was not found. Installing a runner now.`);
+    core.info(`Installing a runner now.`);
 
     await installRunner(runnerConfig);
 }

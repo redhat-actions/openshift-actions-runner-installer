@@ -4,11 +4,12 @@
  **************************************************************************************************/
 
 namespace Constants {
-    export const DEFAULT_IMG = "quay.io/redhat-actions/runner";
+    export const DEFAULT_IMG = "quay.io/redhat-github-actions/runner";
     export const DEFAULT_IMG_TAG = "v0.1";
 
     export const CHART_REPO_NAME = "openshift-actions-runner-chart";
     export const CHART_REPO_URL = `https://github.com/redhat-actions/${CHART_REPO_NAME}`;
+    export const CHART_REPO_REF = "main";
     /**
      * Path to the chart relative to the root of the CHART_REPO
      */

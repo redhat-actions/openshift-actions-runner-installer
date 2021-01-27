@@ -22,11 +22,11 @@ export async function getMatchingRunners(
         return undefined;
     }
 
-    core.info(`Looking for runner with labels: ${requiredLabels.join(", ")}`);
+    core.info(`Looking for runner with labels: ${joinList(requiredLabels.map((label) => `"${label}"`))}`);
 
     const matchingRunners = selfHostedRunnersResponse.runners.filter((runner) => {
         const runnerLabels = runner.labels.map((label) => label.name);
-        core.info(`${runner.name} has labels: ${runnerLabels.join(", ")}`);
+        core.info(`${runner.name} has labels: ${runnerLabels.map((label) => `"${label}"`).join(", ")}`);
 
         const matchingLabels: string[] = [];
         const missingLabels: string[] = [];

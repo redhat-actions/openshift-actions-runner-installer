@@ -13,6 +13,6 @@ jobs:
         id: check_runner
         uses: ./
         with:
-          github_pat: ${{ secrets.REPO_TOKEN }}
+          github_pat: ${{ secrets.ORG_TOKEN }}
           runner_labels: label1, label2, label3
           helm_release_name: tim-repo-runner

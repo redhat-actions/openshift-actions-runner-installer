@@ -28,3 +28,7 @@ export function joinList(strings_: readonly string[], andOrOr: "and" | "or" = "a
     }
     return joined;
 }
+
+export function splitByNewline(s: string): string[] {
+    return s.split(/\r?\n/);
+}
