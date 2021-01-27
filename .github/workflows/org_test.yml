@@ -9,12 +9,21 @@ jobs:
       - name: Checkout action
         uses: actions/checkout@v2
 
+      - uses: redhat-actions/oc-login@v1.1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SANDBOX_URL }}
+          openshift_token: ${{ secrets.TIM_OPENSHIFT_TOKEN }}
+          namespace: tetchell-code
+          insecure_skip_tls_verify: true
+
       - name: Check self hosted runner
         id: check_runner
         uses: ./
         with:
           runner_location: redhat-actions
           github_pat: ${{ secrets.ORG_TOKEN }}
+          runner_labels: org-label, org-label-2
+          helm_release_name: tim-org-runner
 
       - run: |
           echo "Runner exists: ${{ steps.check_runner.outputs.runner_present }}"
