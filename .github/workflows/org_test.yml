@@ -2,9 +2,9 @@ name: Test self-hosted runner in org
 on: [ push, workflow_dispatch ]
 
 jobs:
-  test-action-job:
+  install-runner:
     runs-on: ubuntu-20.04
-    name: Check for org runner
+    name: Install org runner
     steps:
       - name: Checkout action
         uses: actions/checkout@v2
@@ -16,8 +16,7 @@ jobs:
           namespace: tetchell-code
           insecure_skip_tls_verify: true
 
-      - name: Check self hosted runner
-        id: check_runner
+      - name: Install self hosted runner into org
         uses: ./
         with:
           runner_location: redhat-actions
@@ -25,5 +24,9 @@ jobs:
           runner_labels: org-label, org-label-2
           helm_release_name: tim-org-runner
 
-      - run: |
-          echo "Runner exists: ${{ steps.check_runner.outputs.runner_present }}"
+  test-selfhosted:
+    runs-on: [ self-hosted, org-label, org-label-2 ]
+    needs: install-runner
+
+    steps:
+      - run: "hostname"

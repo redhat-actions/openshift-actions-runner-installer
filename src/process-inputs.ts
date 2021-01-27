@@ -18,8 +18,10 @@ export default function processInputs(): RunnerConfiguration {
     core.setSecret(encodedPat);
     const helmReleaseName = core.getInput(Inputs.HELM_RELEASE_NAME, { required: true });
 
-    const runnerLocationStr = core.getInput(Inputs.RUNNER_LOCATION)
-        || `${github.context.repo.owner}/${github.context.repo.repo}`;
+    const runnerLocInput = core.getInput(Inputs.RUNNER_LOCATION);
+    core.debug(`Runner location input is ${runnerLocInput}`);
+
+    const runnerLocationStr = runnerLocInput || `${github.context.repo.owner}/${github.context.repo.repo}`;
 
     const runnerLocation = getRunnerLocationObj(runnerLocationStr);
 

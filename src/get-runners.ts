@@ -14,7 +14,7 @@ export async function getMatchingRunners(
     githubPat: string, runnerLocation: RunnerLocation, requiredLabels: string[]
 ): Promise<SelfHostedRunner[] | undefined> {
     const selfHostedRunnersResponse = await listSelfHostedRunners(githubPat, runnerLocation);
-    core.debug(JSON.stringify(selfHostedRunnersResponse.runners));
+    core.debug(JSON.stringify(selfHostedRunnersResponse.runners, undefined, 2));
 
     core.info(`${runnerLocation.toString()} has ${selfHostedRunnersResponse.total_count} runners.`);
 

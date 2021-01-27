@@ -2,17 +2,31 @@ name: Test self-hosted runner in repo
 on: [ push, workflow_dispatch ]
 
 jobs:
-  test-action-job:
+  install-runner:
     runs-on: ubuntu-20.04
-    name: Check for repo runner
+    name: Install repo runner
     steps:
       - name: Checkout action
         uses: actions/checkout@v2
 
-      - name: Check self hosted runner
-        id: check_runner
+      - uses: redhat-actions/oc-login@v1.1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SANDBOX_URL }}
+          openshift_token: ${{ secrets.TIM_OPENSHIFT_TOKEN }}
+          namespace: tetchell-code
+          insecure_skip_tls_verify: true
+
+      - name: Install self hosted runner into repository
         uses: ./
         with:
-          github_pat: ${{ secrets.ORG_TOKEN }}
-          runner_labels: label1, label2, label3
+          runner_location: ${{ github.repository }}
+          github_pat: ${{ secrets.REPO_TOKEN }}
+          runner_labels: repo-label, repo-label-2
           helm_release_name: tim-repo-runner
+
+  test-selfhosted:
+    runs-on: [ self-hosted, repo-label, repo-label-2 ]
+    needs: install-runner
+
+    steps:
+      - run: "hostname"
