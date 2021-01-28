@@ -19,10 +19,11 @@ jobs:
       - name: Install self hosted runner into org
         uses: ./
         with:
-          runner_location: redhat-actions
           github_pat: ${{ secrets.ORG_TOKEN }}
+          runner_location: redhat-actions
           runner_labels: org-label, org-label-2
-          helm_release_name: tim-org-runner
+          # helm_release_name: tim-org-runner
+          runner_replicas: 2
 
   test-selfhosted:
     runs-on: [ self-hosted, org-label, org-label-2 ]

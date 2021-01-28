@@ -15,8 +15,8 @@ export enum Inputs {
      */
     HELM_EXTRA_ARGS = "helm_extra_args",
     /**
-     * The Helm Release name to give the new runner release.
-     * Required: true
+     * The Helm Release name to give the new runner release. Defaults to the repository or org name plus "-runners".
+     * Required: false
      * Default: None.
      */
     HELM_RELEASE_NAME = "helm_release_name",
@@ -53,6 +53,12 @@ export enum Inputs {
      * Default: None.
      */
     RUNNER_LOCATION = "runner_location",
+    /**
+     * Number of runner replicas to create.
+     * Required: true
+     * Default: "1"
+     */
+    RUNNER_REPLICAS = "runner_replicas",
 }
 
 export enum Outputs {

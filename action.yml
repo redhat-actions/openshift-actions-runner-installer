@@ -21,6 +21,10 @@ inputs:
       Labels in the runners to check for.
       For multiple labels, separate by comma and an optional space. For example, "label1, label2".
     required: false
+  runner_replicas:
+    description: Number of runner replicas to create.
+    required: true
+    default: "1"
   image:
     description: Container image to use for the runner.
     required: false
@@ -32,8 +36,8 @@ inputs:
       Optional namespace (aka project) to pass to all Helm or Kubernetes commands.
     required: false
   helm_release_name:
-    description: The Helm Release name to give the new runner release.
-    required: true
+    description: The Helm Release name to give the new runner release. Defaults to the repository or org name plus "-runners".
+    required: false
   helm_extra_args:
     description: |
       Any other arguments to pass to the 'helm upgrade --install' command.

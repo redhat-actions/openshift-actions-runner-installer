@@ -39,9 +39,10 @@ export interface RunnerConfiguration {
     namespace?: string | undefined;
     helmExtraArgs: string[];
     helmReleaseName: string;
-    image: string;
-    tag: string;
     githubPat: string;
     runnerLocation: RunnerLocation;
     runnerLabels: string[];
+    runnerImage: string;
+    runnerReplicas: string;
+    runnerTag: string;
 }

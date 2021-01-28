@@ -12,7 +12,11 @@ import { getMatchingRunners } from "./get-runners";
 
 export async function run(): Promise<void> {
     const runnerConfig = processInputs();
-    const taggedImage = `${runnerConfig.image}:${runnerConfig.tag}`;
+    core.debug(`INPUTS:`);
+    core.debug(JSON.stringify(runnerConfig, undefined, 2));
+    const taggedImage = `${runnerConfig.runnerImage}:${runnerConfig.runnerTag}`;
+
+    core.info(`Fetching self-hosted runners for ${runnerConfig.runnerLocation}`);
 
     const matchingRunners = await getMatchingRunners(
         runnerConfig.githubPat, runnerConfig.runnerLocation, runnerConfig.runnerLabels.concat(taggedImage),

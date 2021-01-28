@@ -9,7 +9,7 @@ import * as path from "path";
 
 import exec from "./util/exec";
 import Constants from "./constants";
-import { joinList, splitByNewline } from "./util/util";
+import { splitByNewline } from "./util/util";
 import { RunnerConfiguration } from "./types/types";
 
 export default async function installRunner(config: RunnerConfiguration): Promise<void> {
@@ -47,6 +47,7 @@ enum HelmValueNames {
     RUNNER_IMAGE = "runnerImage",
     RUNNER_TAG = "runnerTag",
     RUNNER_LABELS = "runnerLabels",
+    RUNNER_REPLICAS = "replicas",
     GITHUB_PAT = "githubPat",
     GITHUB_OWNER = "githubOwner",
     GITHUB_REPO = "githubRepository",
@@ -64,10 +65,11 @@ async function runHelmInstall(chartDir: string, config: RunnerConfiguration): Pr
         // "--debug",
         config.helmReleaseName,
         chartDir,
-        "--set-string", `${HelmValueNames.RUNNER_IMAGE}=${config.image}`,
-        "--set-string", `${HelmValueNames.RUNNER_TAG}=${config.tag}`,
+        "--set-string", `${HelmValueNames.RUNNER_IMAGE}=${config.runnerImage}`,
+        "--set-string", `${HelmValueNames.RUNNER_TAG}=${config.runnerTag}`,
         "--set-string", `${HelmValueNames.GITHUB_PAT}=${config.githubPat}`,
         "--set-string", `${HelmValueNames.GITHUB_OWNER}=${config.runnerLocation.owner}`,
+        "--set", `${HelmValueNames.RUNNER_REPLICAS}=${config.runnerReplicas}`,
     ];
 
     if (config.runnerLocation.repository) {
@@ -90,9 +92,9 @@ async function runHelmInstall(chartDir: string, config: RunnerConfiguration): Pr
 
     await exec(helmPath, helmUpgradeArgs);
 
-    core.info(`Helm upgrade succeeded.`);
-
-    await exec(helmPath, [ "get", "manifest", config.helmReleaseName ]);
+    await core.group("Helm Manifest", async () => {
+        await exec(helmPath, [ "get", "manifest", config.helmReleaseName ]);
+    });
 }
 
 // Do not quote the jsonpath curly braces as you normally would - it looks like @actions/exec does some extra escaping.
@@ -163,7 +165,7 @@ async function getAndWaitForPods(kubeclientPath: string, releaseName: string, na
     );
 
     const pods = splitByNewline(podNamesStr);
-    core.info(`Released pod${pods.length !== 1 ? "s are" : " is"} ${joinList(pods)}`);
+    // core.info(`Released pod${pods.length !== 1 ? "s are" : " is"} ${joinList(pods)}`);
 
     // show the resourecs in the familiar format
     await execKubeGet(kubeclientPath, namespace, "deployments,replicasets,pods", labelSelectorArg);
