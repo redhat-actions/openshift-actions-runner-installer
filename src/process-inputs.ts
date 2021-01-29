@@ -37,7 +37,10 @@ export default function processInputs(): RunnerConfiguration {
     const inputExtraArgsStr = core.getInput(Inputs.HELM_EXTRA_ARGS);
     let helmExtraArgs: string[] = [];
     if (inputExtraArgsStr) {
-        helmExtraArgs = splitByNewline(inputExtraArgsStr).map((arg) => arg.trim());
+        // transform the array of lines into an array of arguments
+        // by splitting over lines, then over spaces, then trimming.
+        const lines = splitByNewline(inputExtraArgsStr);
+        helmExtraArgs = lines.flatMap((line) => line.split(" ")).map((arg) => arg.trim());
     }
 
     let namespace: string | undefined = core.getInput(Inputs.NAMESPACE);

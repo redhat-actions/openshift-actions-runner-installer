@@ -24,6 +24,8 @@ jobs:
           runner_labels: org-label, org-label-2
           # helm_release_name: tim-org-runner
           runner_replicas: 2
+          helm_extra_args: |
+            --set-string secretName="github-org-pat"
 
   test-selfhosted:
     runs-on: [ self-hosted, org-label, org-label-2 ]
