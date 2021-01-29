@@ -32,3 +32,31 @@ export function joinList(strings_: readonly string[], andOrOr: "and" | "or" = "a
 export function splitByNewline(s: string): string[] {
     return s.split(/\r?\n/);
 }
+
+export function awaitWithRetry<T = void>(
+    timeoutS: number, delayS: number, errMsg: string,
+    executor: (resolve: (value: T) => void, reject?: (err: Error) => void) => Promise<T>
+): Promise<T> {
+    let tries = 0;
+    const maxTries = timeoutS / delayS;
+
+    let interval: NodeJS.Timeout | undefined;
+
+    return new Promise<T>((resolve, reject) => {
+        interval = setInterval(async () => {
+            await executor(resolve, reject);
+
+            if (tries > maxTries) {
+                reject(new Error(errMsg));
+                return;
+            }
+
+            tries++;
+        },
+        delayS * 1000);
+    }).finally(() => {
+        if (interval) {
+            clearInterval(interval);
+        }
+    });
+}

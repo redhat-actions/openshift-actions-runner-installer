@@ -8,7 +8,7 @@ import * as github from "@actions/github";
 
 import RunnerLocation from "./types/runner-location";
 import { Octokit, SelfHostedRunner, SelfHostedRunnersResponse } from "./types/types";
-import { joinList } from "./util/util";
+import { awaitWithRetry, joinList } from "./util/util";
 
 export async function getMatchingRunners(
     githubPat: string, runnerLocation: RunnerLocation, requiredLabels: string[]
@@ -62,7 +62,39 @@ export async function getMatchingRunners(
     return matchingRunners;
 }
 
-export async function listSelfHostedRunners(
+const WAIT_FOR_RUNNERS_TIMEOUT = 120;
+
+export async function waitForARunnerToExist(
+    githubPat: string, runnerLocation: RunnerLocation, newRunnerNames: string[]
+): Promise<boolean> {
+    const noRunnerErrMsg = `None of the expected runners were added to ${runnerLocation} `
+        + `within ${WAIT_FOR_RUNNERS_TIMEOUT}`;
+
+    core.info(`Waiting for one of the new runners to come up: ${joinList(newRunnerNames, "or")}`);
+
+    try {
+        await awaitWithRetry(WAIT_FOR_RUNNERS_TIMEOUT, 5, noRunnerErrMsg,
+            async (resolve) => {
+                const existingRunners = await listSelfHostedRunners(githubPat, runnerLocation);
+                const existingRunnerNames = existingRunners.runners.map((runner) => runner.name);
+                // core.info(`Existing runners are ${joinList(existingRunnerNames)}`);
+
+                const newRunnerName = existingRunnerNames.find((runnerName) => newRunnerNames.includes(runnerName));
+
+                if (newRunnerName != null) {
+                    core.info(`Found new runner ${newRunnerName}`);
+                    resolve();
+                }
+            });
+
+        return true;
+    }
+    catch (err) {
+        return false;
+    }
+}
+
+async function listSelfHostedRunners(
     githubPat: string, runnerLocation: RunnerLocation
 ): Promise<SelfHostedRunnersResponse> {
     const octokit = await getOctokit(githubPat);

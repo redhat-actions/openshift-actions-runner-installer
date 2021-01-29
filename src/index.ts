@@ -8,7 +8,7 @@ import * as core from "@actions/core";
 import installRunner from "./install-runner";
 import { joinList } from "./util/util";
 import processInputs from "./process-inputs";
-import { getMatchingRunners } from "./get-runners";
+import { getMatchingRunners, waitForARunnerToExist } from "./get-runners";
 
 export async function run(): Promise<void> {
     const runnerConfig = processInputs();
@@ -35,7 +35,11 @@ export async function run(): Promise<void> {
 
     core.info(`Installing a runner now.`);
 
-    await installRunner(runnerConfig);
+    const installedRunnerPodnames = await installRunner(runnerConfig);
+
+    await waitForARunnerToExist(runnerConfig.githubPat, runnerConfig.runnerLocation, installedRunnerPodnames);
+
+    core.info(`Successfully started a self-hosted runner.`);
 }
 
 run().catch((err) => core.setFailed(err.message));

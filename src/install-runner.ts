@@ -9,15 +9,14 @@ import * as path from "path";
 
 import exec from "./util/exec";
 import Constants from "./constants";
-import { splitByNewline } from "./util/util";
+import { awaitWithRetry, splitByNewline } from "./util/util";
 import { RunnerConfiguration } from "./types/types";
+import { getKubeCommandExecutor } from "./types/kube-executor";
 
-export default async function installRunner(config: RunnerConfiguration): Promise<void> {
+export default async function installRunner(config: RunnerConfiguration): Promise<string[]> {
     const gitPath = await io.which("git", true);
-    // get kubeclient before we need it so that we can fail earlier if it's missing
-    const kubeclientPath = await getKubeClientPath();
 
-    const chartCloneDir = path.join(process.cwd(), `${Constants.CHART_REPO_NAME}-${Date.now()}`);
+    const chartCloneDir = path.join(process.cwd(), `${Constants.CHART_REPO_NAME}-${Date.now()}/`);
     await exec(gitPath, [
         "clone",
         "--depth", "1",
@@ -40,7 +39,7 @@ export default async function installRunner(config: RunnerConfiguration): Promis
         await io.rmRF(chartCloneDir);
     }
 
-    await getAndWaitForPods(kubeclientPath, config.helmReleaseName, config.namespace);
+    return getAndWaitForPods(config.helmReleaseName, config.runnerReplicas, config.namespace);
 }
 
 enum HelmValueNames {
@@ -100,67 +99,58 @@ async function runHelmInstall(chartDir: string, config: RunnerConfiguration): Pr
 // Do not quote the jsonpath curly braces as you normally would - it looks like @actions/exec does some extra escaping.
 const JSONPATH_NAME_ARG = `jsonpath={.items[*].metadata.name}{"\\n"}`;
 const JSONPATH_REPLICAS_ARG = `jsonpath={.items[*].status.availableReplicas}{"\\n"}`;
+
 const DEPLOYMENT_READY_TIMEOUT_S = 120;
 
-async function getAndWaitForPods(kubeclientPath: string, releaseName: string, namespace?: string): Promise<string[]> {
+async function getAndWaitForPods(
+    releaseName: string, desiredNoReplicas: string, namespace?: string
+): Promise<string[]> {
     // Helm adds the release name in an anntation by default, but you can't query by annotation.
     // I have modified the chart to add it to this label, too, so we can find the pods easily.
     const labelSelectorArg = `${Constants.RELEASE_NAME_LABEL}=${releaseName}`;
 
-    const deploymentName = await execKubeGet(
-        kubeclientPath,
-        namespace,
-        "deployment",
-        labelSelectorArg,
+    const kubeExecutor = await getKubeCommandExecutor(labelSelectorArg, namespace);
+
+    const deploymentName = await kubeExecutor.get(
+        "deployments",
         JSONPATH_NAME_ARG,
     );
 
-    // const deploymentObj = JSON.parse(getDeploymentsOutput);
-    // const deploymentName = deploymentObj.metadata.name;
-    core.info(`Deployment name is "${deploymentName}"`);
+    const deploymentNotReadyMsg = `Deployment ${deploymentName} did not have any available replicas after `
+        + `${DEPLOYMENT_READY_TIMEOUT_S}s. View the output above to diagnose the error.`;
 
-    let interval: NodeJS.Timeout | undefined;
-    await new Promise<void>((resolve, reject) => {
-        let tries = 0;
-        const delayS = 5;
-        const timeoutS = DEPLOYMENT_READY_TIMEOUT_S;
-        const maxTries = timeoutS / delayS;
+    core.startGroup("Waiting for deployment to come up...");
+    await awaitWithRetry(DEPLOYMENT_READY_TIMEOUT_S, 10, deploymentNotReadyMsg,
+        async (resolve) => {
+            await kubeExecutor.get("all");
 
-        // eslint-disable-next-line consistent-return
-        interval = setInterval(async (): Promise<void> => {
-            const noReplicas = await execKubeGet(
-                kubeclientPath,
-                namespace,
-                "deployment",
-                labelSelectorArg,
-                JSONPATH_REPLICAS_ARG,
-            );
+            const availableReplicas = await kubeExecutor.get("deployments", JSONPATH_REPLICAS_ARG);
 
-            if (!Number.isNaN(noReplicas) && Number(noReplicas) > 0) {
+            if (availableReplicas === desiredNoReplicas) {
                 core.info(`${deploymentName} has at least one available replica`);
-                return resolve();
+                resolve();
+            }
+        })
+        .catch(async (err) => {
+            core.info(`Printing debug info...`);
+
+            try {
+                await kubeExecutor.describe("deployments");
+                await kubeExecutor.get("replicasets");
+                await kubeExecutor.get("pods");
+            }
+            catch (debugErr) {
+                // nothing
             }
 
-            if (tries > maxTries) {
-                return reject(new Error(
-                    `Deployment ${deploymentName} did not have any available replicas after ${timeoutS}s. `
-                    + `Describe the deployment, replicaset, and pods to diagnose the eror.`
-                ));
-            }
+            throw err;
+        })
+        .finally(() => {
+            core.endGroup();
+        });
 
-            tries++;
-        }, delayS * 1000);
-    }).finally(() => {
-        if (interval) {
-            clearInterval(interval);
-        }
-    });
-
-    const podNamesStr = await execKubeGet(
-        kubeclientPath,
-        namespace,
+    const podNamesStr = await kubeExecutor.get(
         "pods",
-        labelSelectorArg,
         JSONPATH_NAME_ARG,
     );
 
@@ -168,44 +158,7 @@ async function getAndWaitForPods(kubeclientPath: string, releaseName: string, na
     // core.info(`Released pod${pods.length !== 1 ? "s are" : " is"} ${joinList(pods)}`);
 
     // show the resourecs in the familiar format
-    await execKubeGet(kubeclientPath, namespace, "deployments,replicasets,pods", labelSelectorArg);
+    await kubeExecutor.get("all");
 
     return pods;
-}
-
-async function execKubeGet(
-    kubeClientPath: string, namespace: string | undefined,
-    resourceType: string, labelSelector: string, outputFormat?: string,
-): Promise<string> {
-    const namespaceArg = namespace ? [ `--namespace=${namespace}` ] : [];
-    const outputArg = outputFormat ? [ "-o", outputFormat ] : [];
-
-    const result = await exec(kubeClientPath, [
-        ...namespaceArg,
-        "get",
-        resourceType,
-        "-l", labelSelector,
-        ...outputArg,
-    ]);
-
-    return result.stdout;
-}
-
-/**
- * @returns The path to oc if it is which-findable, else the path to kubectl if it's findable.
- * @throws If neither oc nor kubectl is findable.
- */
-async function getKubeClientPath(): Promise<string> {
-    const ocPath = await io.which("oc");
-    if (ocPath) {
-        return ocPath;
-    }
-
-    const kubectlPath = await io.which("kubectl");
-    if (!kubectlPath) {
-        throw new Error(
-            `Neither kubectl nor oc was found. One of these tools must be installed, and added to the PATH.`
-        );
-    }
-    return kubectlPath;
 }
