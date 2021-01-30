@@ -55,15 +55,18 @@ enum HelmValueNames {
 async function runHelmInstall(chartDir: string, config: RunnerConfiguration): Promise<void> {
     const helmPath = await io.which("helm", true);
 
-    await exec(helmPath, [ "version" ]);
-    await exec(helmPath, [ "ls" ]);
+    const namespaceArgs = config.namespace ? [ "--namespace", config.namespace ] : [];
 
-    const helmUpgradeArgs = [
+    await exec(helmPath, [ "version" ]);
+    await exec(helmPath, [ "ls", ...namespaceArgs ]);
+
+    const helmUpgradeArgs: string[] = [
         "upgrade",
         "--install",
         // "--debug",
         config.helmReleaseName,
         chartDir,
+        ...namespaceArgs,
         "--set-string", `${HelmValueNames.RUNNER_IMAGE}=${config.runnerImage}`,
         "--set-string", `${HelmValueNames.RUNNER_TAG}=${config.runnerTag}`,
         "--set-string", `${HelmValueNames.GITHUB_PAT}=${config.githubPat}`,
@@ -92,7 +95,7 @@ async function runHelmInstall(chartDir: string, config: RunnerConfiguration): Pr
     await exec(helmPath, helmUpgradeArgs);
 
     await core.group("Helm Manifest", async () => {
-        await exec(helmPath, [ "get", "manifest", config.helmReleaseName ]);
+        await exec(helmPath, [ "get", "manifest", config.helmReleaseName, ...namespaceArgs ]);
     });
 }
 
@@ -100,7 +103,7 @@ async function runHelmInstall(chartDir: string, config: RunnerConfiguration): Pr
 const JSONPATH_NAME_ARG = `jsonpath={.items[*].metadata.name}{"\\n"}`;
 const JSONPATH_REPLICAS_ARG = `jsonpath={.items[*].status.availableReplicas}{"\\n"}`;
 
-const DEPLOYMENT_READY_TIMEOUT_S = 120;
+const DEPLOYMENT_READY_TIMEOUT_S = 60;
 
 async function getAndWaitForPods(
     releaseName: string, desiredNoReplicas: string, namespace?: string
@@ -119,8 +122,8 @@ async function getAndWaitForPods(
     const deploymentNotReadyMsg = `Deployment ${deploymentName} did not have any available replicas after `
         + `${DEPLOYMENT_READY_TIMEOUT_S}s. View the output above to diagnose the error.`;
 
-    core.startGroup("Waiting for deployment to come up...");
-    await awaitWithRetry(DEPLOYMENT_READY_TIMEOUT_S, 10, deploymentNotReadyMsg,
+    await awaitWithRetry(DEPLOYMENT_READY_TIMEOUT_S, 10,
+        "Waiting for deployment to come up...", deploymentNotReadyMsg,
         async (resolve) => {
             await kubeExecutor.get("all");
 
@@ -136,17 +139,14 @@ async function getAndWaitForPods(
 
             try {
                 await kubeExecutor.describe("deployments");
-                await kubeExecutor.get("replicasets");
-                await kubeExecutor.get("pods");
+                await kubeExecutor.describe("replicasets");
+                await kubeExecutor.describe("pods");
             }
             catch (debugErr) {
                 // nothing
             }
 
             throw err;
-        })
-        .finally(() => {
-            core.endGroup();
         });
 
     core.info(`Deployment ${deploymentName} has successfully come up`);

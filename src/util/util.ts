@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  **************************************************************************************************/
 
+import * as core from "@actions/core";
+
 /**
  * Joins a string array into a user-friendly list.
  * Eg, `joinList([ "tim", "erin", "john" ], "and")` => "tim, erin and john"
@@ -34,13 +36,15 @@ export function splitByNewline(s: string): string[] {
 }
 
 export function awaitWithRetry<T = void>(
-    timeoutS: number, delayS: number, errMsg: string,
+    timeoutS: number, delayS: number, groupName: string, errMsg: string,
     executor: (resolve: (value: T) => void, reject?: (err: Error) => void) => Promise<void>
 ): Promise<T> {
     let tries = 0;
     const maxTries = timeoutS / delayS;
 
     let interval: NodeJS.Timeout | undefined;
+
+    core.startGroup(groupName);
 
     return new Promise<T>((resolve, reject) => {
         interval = setInterval(async () => {
@@ -58,5 +62,6 @@ export function awaitWithRetry<T = void>(
         if (interval) {
             clearInterval(interval);
         }
+        core.endGroup();
     });
 }

@@ -9,7 +9,7 @@ export enum Inputs {
     GITHUB_PAT = "github_pat",
     /**
      * Any other arguments to pass to the 'helm upgrade --install' command.
-     * Separate arguments by newline. Quotes are optional.
+     * Separate arguments by newline. Do not use quotes - @actions/exec will do the quoting for you.
      * Required: false
      * Default: None.
      */
@@ -21,23 +21,17 @@ export enum Inputs {
      */
     HELM_RELEASE_NAME = "helm_release_name",
     /**
-     * Container image to use for the runner.
-     * Required: false
-     * Default: None.
-     */
-    IMAGE = "image",
-    /**
-     * Tag to use for the runner container image.
-     * Required: false
-     * Default: None.
-     */
-    IMAGE_TAG = "image_tag",
-    /**
      * Optional namespace (aka project) to pass to all Helm or Kubernetes commands.
      * Required: false
      * Default: None.
      */
     NAMESPACE = "namespace",
+    /**
+     * Container image to use for the runner.
+     * Required: false
+     * Default: None.
+     */
+    RUNNER_IMAGE = "runner_image",
     /**
      * Labels in the runners to check for.
      * For multiple labels, separate by comma and an optional space. For example, "label1, label2".
@@ -59,6 +53,12 @@ export enum Inputs {
      * Default: "1"
      */
     RUNNER_REPLICAS = "runner_replicas",
+    /**
+     * Tag to use for the runner container image.
+     * Required: false
+     * Default: None.
+     */
+    RUNNER_TAG = "runner_tag",
 }
 
 export enum Outputs {

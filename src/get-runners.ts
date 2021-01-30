@@ -61,7 +61,7 @@ export async function getMatchingRunners(
     return matchingRunners;
 }
 
-const WAIT_FOR_RUNNERS_TIMEOUT = 120;
+const WAIT_FOR_RUNNERS_TIMEOUT = 60;
 
 export async function waitForARunnerToExist(
     githubPat: string, runnerLocation: RunnerLocation, newRunnerNames: string[]
@@ -71,9 +71,8 @@ export async function waitForARunnerToExist(
 
     core.info(`Waiting for one of the new runners to come up: ${joinList(newRunnerNames, "or")}`);
 
-    core.startGroup(`Waiting for runners to become available...`);
-
-    return awaitWithRetry<string>(WAIT_FOR_RUNNERS_TIMEOUT, 10, noRunnerErrMsg,
+    return awaitWithRetry<string>(WAIT_FOR_RUNNERS_TIMEOUT, 10,
+        `Waiting for runners to become available...`, noRunnerErrMsg,
         async (resolve) => {
             const existingRunners = await listSelfHostedRunners(githubPat, runnerLocation);
             const existingRunnerNames = existingRunners.runners.map((runner) => runner.name);
@@ -91,8 +90,7 @@ export async function waitForARunnerToExist(
                 core.info(`Found new runner ${newRunnerName}`);
                 resolve(newRunnerName);
             }
-        })
-        .finally(() => core.endGroup());
+        });
 }
 
 async function listSelfHostedRunners(

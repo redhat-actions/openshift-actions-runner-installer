@@ -36,8 +36,8 @@ export default function processInputs(): RunnerConfiguration {
     }
     helmReleaseName = validateResourceName(helmReleaseName);
 
-    const runnerImage = core.getInput(Inputs.IMAGE) || Constants.DEFAULT_IMG;
-    const runnerTag = core.getInput(Inputs.IMAGE_TAG) || Constants.DEFAULT_IMG_TAG;
+    const runnerImage = core.getInput(Inputs.RUNNER_IMAGE) || Constants.DEFAULT_IMG;
+    const runnerTag = core.getInput(Inputs.RUNNER_TAG) || Constants.DEFAULT_IMG_TAG;
 
     const inputLabelsStr = core.getInput(Inputs.RUNNER_LABELS);
     let runnerLabels: string[] = [];
