@@ -23,7 +23,18 @@ export default function processInputs(): RunnerConfiguration {
     const runnerLocation = getRunnerLocationObj(runnerLocationStr);
 
     const helmReleaseNameInput = core.getInput(Inputs.HELM_RELEASE_NAME);
-    const helmReleaseName = helmReleaseNameInput || `${runnerLocation.toString().replace(/\//g, "-")}-runner`;
+
+    let helmReleaseName;
+    if (helmReleaseNameInput) {
+        helmReleaseName = helmReleaseNameInput;
+    }
+    else if (runnerLocation.repository) {
+        helmReleaseName = runnerLocation.repository + "-runner";
+    }
+    else {
+        helmReleaseName = runnerLocation.owner + "-runner";
+    }
+    helmReleaseName = validateResourceName(helmReleaseName);
 
     const runnerImage = core.getInput(Inputs.IMAGE) || Constants.DEFAULT_IMG;
     const runnerTag = core.getInput(Inputs.IMAGE_TAG) || Constants.DEFAULT_IMG_TAG;
@@ -73,4 +84,26 @@ function getRunnerLocationObj(runnerLocationStr: string): RunnerLocation {
     }
 
     return new RunnerLocation(runnerLocationStr);
+}
+
+export function validateResourceName(name: string): string {
+    // https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#dns-label-names
+
+    // replace chars that may be in github repo/org name
+    const nameWithReplacements = name.toLowerCase().replace(/[ _/.]/g, "-");
+
+    if (!nameWithReplacements.match(/^[a-z0-9-]+$/)) {
+        throw new Error(
+            `Helm release name "${name}" contains illegal characters. `
+            + `Can only container lowercase letters, numbers, and '-'.`
+        );
+    }
+    if (!nameWithReplacements.match(/^[a-z]/) || !nameWithReplacements.match(/[a-z]$/)) {
+        throw new Error(`Helm release name "${name}" must start and end with a lowercase letter.`);
+    }
+    if (nameWithReplacements.length > 63) {
+        throw new Error(`Helm release name "${name}" must be shorter than 64 characters.`);
+    }
+
+    return nameWithReplacements;
 }

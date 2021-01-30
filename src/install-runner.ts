@@ -9,7 +9,7 @@ import * as path from "path";
 
 import exec from "./util/exec";
 import Constants from "./constants";
-import { awaitWithRetry, splitByNewline } from "./util/util";
+import { awaitWithRetry } from "./util/util";
 import { RunnerConfiguration } from "./types/types";
 import { getKubeCommandExecutor } from "./types/kube-executor";
 
@@ -127,7 +127,7 @@ async function getAndWaitForPods(
             const availableReplicas = await kubeExecutor.get("deployments", JSONPATH_REPLICAS_ARG);
 
             if (availableReplicas === desiredNoReplicas) {
-                core.info(`${deploymentName} has at least one available replica`);
+                core.info(`${deploymentName} has ${desiredNoReplicas} replicas!`);
                 resolve();
             }
         })
@@ -149,12 +149,14 @@ async function getAndWaitForPods(
             core.endGroup();
         });
 
+    core.info(`Deployment ${deploymentName} has successfully come up`);
+
     const podNamesStr = await kubeExecutor.get(
         "pods",
         JSONPATH_NAME_ARG,
     );
 
-    const pods = splitByNewline(podNamesStr);
+    const pods = podNamesStr.split(" ");
     // core.info(`Released pod${pods.length !== 1 ? "s are" : " is"} ${joinList(pods)}`);
 
     // show the resourecs in the familiar format

@@ -35,7 +35,7 @@ export function splitByNewline(s: string): string[] {
 
 export function awaitWithRetry<T = void>(
     timeoutS: number, delayS: number, errMsg: string,
-    executor: (resolve: (value: T) => void, reject?: (err: Error) => void) => Promise<T>
+    executor: (resolve: (value: T) => void, reject?: (err: Error) => void) => Promise<void>
 ): Promise<T> {
     let tries = 0;
     const maxTries = timeoutS / delayS;

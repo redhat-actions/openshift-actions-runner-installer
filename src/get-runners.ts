@@ -14,7 +14,6 @@ export async function getMatchingRunners(
     githubPat: string, runnerLocation: RunnerLocation, requiredLabels: string[]
 ): Promise<SelfHostedRunner[] | undefined> {
     const selfHostedRunnersResponse = await listSelfHostedRunners(githubPat, runnerLocation);
-    core.debug(JSON.stringify(selfHostedRunnersResponse.runners, undefined, 2));
 
     core.info(`${runnerLocation.toString()} has ${selfHostedRunnersResponse.total_count} runners.`);
 
@@ -66,32 +65,34 @@ const WAIT_FOR_RUNNERS_TIMEOUT = 120;
 
 export async function waitForARunnerToExist(
     githubPat: string, runnerLocation: RunnerLocation, newRunnerNames: string[]
-): Promise<boolean> {
+): Promise<string> {
     const noRunnerErrMsg = `None of the expected runners were added to ${runnerLocation} `
-        + `within ${WAIT_FOR_RUNNERS_TIMEOUT}`;
+        + `within ${WAIT_FOR_RUNNERS_TIMEOUT}s`;
 
     core.info(`Waiting for one of the new runners to come up: ${joinList(newRunnerNames, "or")}`);
 
-    try {
-        await awaitWithRetry(WAIT_FOR_RUNNERS_TIMEOUT, 5, noRunnerErrMsg,
-            async (resolve) => {
-                const existingRunners = await listSelfHostedRunners(githubPat, runnerLocation);
-                const existingRunnerNames = existingRunners.runners.map((runner) => runner.name);
-                // core.info(`Existing runners are ${joinList(existingRunnerNames)}`);
+    core.startGroup(`Waiting for runners to become available...`);
 
-                const newRunnerName = existingRunnerNames.find((runnerName) => newRunnerNames.includes(runnerName));
+    return awaitWithRetry<string>(WAIT_FOR_RUNNERS_TIMEOUT, 10, noRunnerErrMsg,
+        async (resolve) => {
+            const existingRunners = await listSelfHostedRunners(githubPat, runnerLocation);
+            const existingRunnerNames = existingRunners.runners.map((runner) => runner.name);
+            if (existingRunnerNames.length > 0) {
+                core.info(`${runnerLocation} runners are: ${joinList(existingRunnerNames)}`);
+            }
+            else {
+                core.info(`${runnerLocation} has no runners.`);
+            }
 
-                if (newRunnerName != null) {
-                    core.info(`Found new runner ${newRunnerName}`);
-                    resolve();
-                }
-            });
+            const newRunnerName = existingRunnerNames
+                .find((existingRunnerName) => newRunnerNames.includes(existingRunnerName));
 
-        return true;
-    }
-    catch (err) {
-        return false;
-    }
+            if (newRunnerName != null) {
+                core.info(`Found new runner ${newRunnerName}`);
+                resolve(newRunnerName);
+            }
+        })
+        .finally(() => core.endGroup());
 }
 
 async function listSelfHostedRunners(
@@ -121,6 +122,8 @@ async function listSelfHostedRunners(
     catch (err) {
         throw getBetterHttpError(err);
     }
+
+    core.debug(`Self-hosted runners response: ${JSON.stringify(response.data, undefined, 2)}`);
 
     return response.data;
 }

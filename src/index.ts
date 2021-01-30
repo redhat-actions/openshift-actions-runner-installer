@@ -36,10 +36,13 @@ export async function run(): Promise<void> {
     core.info(`Installing a runner now.`);
 
     const installedRunnerPodnames = await installRunner(runnerConfig);
+    core.debug(`installedRunnerPodnames are ${installedRunnerPodnames}`);
 
-    await waitForARunnerToExist(runnerConfig.githubPat, runnerConfig.runnerLocation, installedRunnerPodnames);
+    const newRunner = await waitForARunnerToExist(
+        runnerConfig.githubPat, runnerConfig.runnerLocation, installedRunnerPodnames
+    );
 
-    core.info(`Successfully started a self-hosted runner.`);
+    core.info(`Success: new self-hosted runner ${newRunner} is up and running.`);
 }
 
 run().catch((err) => core.setFailed(err.message));
