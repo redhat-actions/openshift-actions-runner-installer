@@ -37,12 +37,30 @@ async function getKubeClientPath(): Promise<string> {
 type KubeResourceType = "all" | "pods" | "replicasets" | "deployments";        // well, these are all we need for now.
 
 export class KubeCommandExecutor {
+    private readonly namespaceArg: string[];
+
+    private readonly labelSelectorArg: string[];
+
     constructor(
         private readonly kubeClientPath: string,
-        private readonly labelSelector?: string,
-        private readonly namespace?: string
+        labelSelector?: string,
+        namespace?: string
     ) {
+        this.namespaceArg = namespace ? [ "--namespace", namespace ] : [];
+        this.labelSelectorArg = labelSelector ? [ "--selector", labelSelector ] : [];
+    }
 
+    public async logs(podName: string, containerName?: string): Promise<string> {
+        const containerNameArg = containerName ? [ containerName ] : [];
+
+        const result = await exec(this.kubeClientPath, [
+            ...this.namespaceArg,
+            "logs",
+            podName,
+            ...containerNameArg,
+        ]);
+
+        return result.stdout;
     }
 
     public describe(resourceType: KubeResourceType, outputFormat?: string): Promise<string> {
@@ -56,15 +74,13 @@ export class KubeCommandExecutor {
     private async view(
         operation: "get" | "describe", resourceType: KubeResourceType, outputFormat?: string
     ): Promise<string> {
-        const namespaceArg = this.namespace ? [ "--namespace", this.namespace ] : [];
-        const selectorArg = this.labelSelector ? [ "--selector", this.labelSelector ] : [];
         const outputArg = outputFormat ? [ "--output", outputFormat ] : [];
 
         const result = await exec(this.kubeClientPath, [
-            ...namespaceArg,
+            ...this.namespaceArg,
             operation,
             resourceType,
-            ...selectorArg,
+            ...this.labelSelectorArg,
             ...outputArg,
         ]);
 

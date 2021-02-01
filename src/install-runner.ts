@@ -9,7 +9,7 @@ import * as path from "path";
 
 import exec from "./util/exec";
 import Constants from "./constants";
-import { awaitWithRetry } from "./util/util";
+import { awaitWithRetry, splitByNewline } from "./util/util";
 import { RunnerConfiguration } from "./types/types";
 import { getKubeCommandExecutor } from "./types/kube-executor";
 
@@ -100,8 +100,12 @@ async function runHelmInstall(chartDir: string, config: RunnerConfiguration): Pr
 }
 
 // Do not quote the jsonpath curly braces as you normally would - it looks like @actions/exec does some extra escaping.
-const JSONPATH_NAME_ARG = `jsonpath={.items[*].metadata.name}{"\\n"}`;
-const JSONPATH_REPLICAS_ARG = `jsonpath={.items[*].status.availableReplicas}{"\\n"}`;
+const JSONPATH_METADATA_NAME = `jsonpath={.items[*].metadata.name}{"\\n"}`;
+// we could also use "replicas" instead of "availableReplicas" to not wait for the container to start
+const JSONPATH_DEPLOY_REPLICAS = `jsonpath={.items[*].status.availableReplicas}{"\\n"}`;
+// This outputs a line per pod, "<pod name> <pod phase>"
+// https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase
+const JSONPATH_POD_PHASES = `jsonpath={range .items[*]}{.metadata.name}{" "}{.status.phase}{"\n"}{end}`;
 
 const DEPLOYMENT_READY_TIMEOUT_S = 60;
 
@@ -116,44 +120,62 @@ async function getAndWaitForPods(
 
     const deploymentName = await kubeExecutor.get(
         "deployments",
-        JSONPATH_NAME_ARG,
+        JSONPATH_METADATA_NAME,
     );
 
     const deploymentNotReadyMsg = `Deployment ${deploymentName} did not have any available replicas after `
         + `${DEPLOYMENT_READY_TIMEOUT_S}s. View the output above to diagnose the error.`;
 
-    await awaitWithRetry(DEPLOYMENT_READY_TIMEOUT_S, 10,
+    await awaitWithRetry(
+        DEPLOYMENT_READY_TIMEOUT_S, 5,
         "Waiting for deployment to come up...", deploymentNotReadyMsg,
         async (resolve) => {
             await kubeExecutor.get("all");
 
-            const availableReplicas = await kubeExecutor.get("deployments", JSONPATH_REPLICAS_ARG);
+            const availableReplicas = await kubeExecutor.get("deployments", JSONPATH_DEPLOY_REPLICAS);
 
             if (availableReplicas === desiredNoReplicas) {
                 core.info(`${deploymentName} has ${desiredNoReplicas} replicas!`);
                 resolve();
             }
-        })
-        .catch(async (err) => {
-            core.info(`Printing debug info...`);
+        }
+    ).catch(async (err) => {
+        core.info(`Printing debug info...`);
 
-            try {
-                await kubeExecutor.describe("deployments");
-                await kubeExecutor.describe("replicasets");
-                await kubeExecutor.describe("pods");
-            }
-            catch (debugErr) {
-                // nothing
-            }
+        try {
+            await kubeExecutor.describe("deployments");
+            await kubeExecutor.describe("replicasets");
+            await kubeExecutor.describe("pods");
 
-            throw err;
-        });
+            // See the jsonpath above for what this output looks like
+            const nonRunningPods = splitByNewline(await kubeExecutor.get("pods", JSONPATH_POD_PHASES))
+                // map the lines to objects containing the podName and pod phase
+                .map((podPhase) => {
+                    const [ podName, phase ] = podPhase.split(" ");
+                    return {
+                        podName, phase,
+                    };
+                })
+                // filter out the ones that succeeded
+                .filter((podPhaseObj) => podPhaseObj.phase !== "Running");
+
+            for (const nonRunningPod of nonRunningPods) {
+                // and print the logs for the pods that did not succeed
+                await kubeExecutor.logs(nonRunningPod.podName);
+            }
+        }
+        catch (debugErr) {
+            core.info(`Failed to print debug info: ${err}`);
+        }
+
+        throw err;
+    });
 
     core.info(`Deployment ${deploymentName} has successfully come up`);
 
     const podNamesStr = await kubeExecutor.get(
         "pods",
-        JSONPATH_NAME_ARG,
+        JSONPATH_METADATA_NAME,
     );
 
     const pods = podNamesStr.split(" ");

@@ -71,7 +71,8 @@ export async function waitForARunnerToExist(
 
     core.info(`Waiting for one of the new runners to come up: ${joinList(newRunnerNames, "or")}`);
 
-    return awaitWithRetry<string>(WAIT_FOR_RUNNERS_TIMEOUT, 10,
+    return awaitWithRetry<string>(
+        WAIT_FOR_RUNNERS_TIMEOUT, 5,
         `Waiting for runners to become available...`, noRunnerErrMsg,
         async (resolve) => {
             const existingRunners = await listSelfHostedRunners(githubPat, runnerLocation);
@@ -90,7 +91,8 @@ export async function waitForARunnerToExist(
                 core.info(`Found new runner ${newRunnerName}`);
                 resolve(newRunnerName);
             }
-        });
+        }
+    );
 }
 
 async function listSelfHostedRunners(
