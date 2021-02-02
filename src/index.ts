@@ -8,7 +8,7 @@ import * as core from "@actions/core";
 import installRunner from "./install-runner";
 import { joinList } from "./util/util";
 import processInputs from "./process-inputs";
-import { getMatchingRunners, waitForARunnerToExist } from "./get-runners";
+import { getMatchingOnlineRunners, waitForARunnerBeOneline } from "./get-runners";
 
 export async function run(): Promise<void> {
     const runnerConfig = processInputs();
@@ -18,27 +18,28 @@ export async function run(): Promise<void> {
 
     core.info(`Fetching self-hosted runners for ${runnerConfig.runnerLocation}`);
 
-    const matchingRunners = await getMatchingRunners(
+    const matchingOnlineRunners = await getMatchingOnlineRunners(
         runnerConfig.githubPat, runnerConfig.runnerLocation, runnerConfig.runnerLabels.concat(taggedImage),
     );
 
-    if (matchingRunners && matchingRunners.length > 0) {
-        const runnerNames = matchingRunners.map((runner) => runner.name);
-        if (matchingRunners.length === 1) {
-            core.info(`Success: Runner ${runnerNames[0]} matches the given labels.`);
+    if (matchingOnlineRunners.length > 0) {
+        const runnerNames = matchingOnlineRunners.map((runner) => runner.name);
+        if (matchingOnlineRunners.length === 1) {
+            core.info(`✅ Runner ${runnerNames[0]} matches the given labels.`);
         }
         else {
-            core.info(`Success: Runners ${joinList(runnerNames)} match the given labels.`);
+            core.info(`✅ Runners ${joinList(runnerNames)} match the given labels.`);
         }
         return;
     }
 
+    core.info(`❌ No online runner with all the required labels was found.`);
     core.info(`Installing a runner now.`);
 
     const installedRunnerPodnames = await installRunner(runnerConfig);
     core.debug(`installedRunnerPodnames are ${installedRunnerPodnames}`);
 
-    const newRunner = await waitForARunnerToExist(
+    const newRunner = await waitForARunnerBeOneline(
         runnerConfig.githubPat, runnerConfig.runnerLocation, installedRunnerPodnames
     );
 

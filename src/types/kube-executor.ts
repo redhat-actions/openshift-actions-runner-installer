@@ -50,39 +50,47 @@ export class KubeCommandExecutor {
         this.labelSelectorArg = labelSelector ? [ "--selector", labelSelector ] : [];
     }
 
-    public async logs(podName: string, containerName?: string): Promise<string> {
+    /* eslint-disable @typescript-eslint/typedef */
+    public async logs(podName: string, containerName?: string, group = false): Promise<string> {
         const containerNameArg = containerName ? [ containerName ] : [];
 
-        const result = await exec(this.kubeClientPath, [
-            ...this.namespaceArg,
-            "logs",
-            podName,
-            ...containerNameArg,
-        ]);
+        const result = await exec(
+            this.kubeClientPath, [
+                ...this.namespaceArg,
+                "logs",
+                podName,
+                ...containerNameArg,
+            ],
+            { group }
+        );
 
         return result.stdout;
     }
 
-    public describe(resourceType: KubeResourceType, outputFormat?: string): Promise<string> {
-        return this.view("describe", resourceType, outputFormat);
+    public describe(resourceType: KubeResourceType, outputFormat?: string, group = false): Promise<string> {
+        return this.view("describe", resourceType, outputFormat, group);
     }
 
-    public async get(resourceType: KubeResourceType, outputFormat?: string): Promise<string> {
-        return this.view("get", resourceType, outputFormat);
+    public async get(resourceType: KubeResourceType, outputFormat?: string, group = false): Promise<string> {
+        return this.view("get", resourceType, outputFormat, group);
     }
 
     private async view(
-        operation: "get" | "describe", resourceType: KubeResourceType, outputFormat?: string
+        // eslint-disable-next-line @typescript-eslint/typedef
+        operation: "get" | "describe", resourceType: KubeResourceType, outputFormat?: string, group = false,
     ): Promise<string> {
         const outputArg = outputFormat ? [ "--output", outputFormat ] : [];
 
-        const result = await exec(this.kubeClientPath, [
-            ...this.namespaceArg,
-            operation,
-            resourceType,
-            ...this.labelSelectorArg,
-            ...outputArg,
-        ]);
+        const result = await exec(
+            this.kubeClientPath, [
+                ...this.namespaceArg,
+                operation,
+                resourceType,
+                ...this.labelSelectorArg,
+                ...outputArg,
+            ],
+            { group }
+        );
 
         return result.stdout;
     }

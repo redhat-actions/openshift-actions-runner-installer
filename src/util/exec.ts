@@ -3,13 +3,14 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  **************************************************************************************************/
 
-import * as ghExec from "@actions/exec";
+import * as core from "@actions/core";
+import * as exec from "@actions/exec";
 import * as path from "path";
 
 export default async function execute(
     executable: string,
     args: string[],
-    execOptions: ghExec.ExecOptions = {},
+    execOptions: exec.ExecOptions & { group?: boolean } = {},
 ): Promise<{ exitCode: number, stdout: string, stderr: string }> {
     let stdout = "";
     let stderr = "";
@@ -26,21 +27,33 @@ export default async function execute(
         },
     };
 
-    const exitCode = await ghExec.exec(executable, args, finalExecOptions);
-
-    if (execOptions.ignoreReturnCode !== true && exitCode !== 0) {
-        // Throwing the stderr as part of the Error makes the stderr show up in the action outline,
-        // which saves some clicking when debugging.
-        let error = `${path.basename(executable)} exited with code ${exitCode}`;
-        if (stderr) {
-            error += `\n${stderr}`;
-        }
-        throw new Error(error);
+    if (execOptions.group) {
+        const groupName = [ executable, ...args ].join(" ");
+        core.startGroup(groupName);
     }
 
-    return {
-        exitCode,
-        stdout: stdout.trim(),
-        stderr: stderr.trim(),
-    };
+    try {
+        const exitCode = await exec.exec(executable, args, finalExecOptions);
+
+        if (execOptions.ignoreReturnCode !== true && exitCode !== 0) {
+            // Throwing the stderr as part of the Error makes the stderr show up in the action outline,
+            // which saves some clicking when debugging.
+            let error = `${path.basename(executable)} exited with code ${exitCode}`;
+            if (stderr) {
+                error += `\n${stderr}`;
+            }
+            throw new Error(error);
+        }
+
+        return {
+            exitCode,
+            stdout: stdout.trim(),
+            stderr: stderr.trim(),
+        };
+    }
+    finally {
+        if (execOptions.group) {
+            core.endGroup();
+        }
+    }
 }

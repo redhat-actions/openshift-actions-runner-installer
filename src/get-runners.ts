@@ -10,20 +10,20 @@ import RunnerLocation from "./types/runner-location";
 import { Octokit, SelfHostedRunner, SelfHostedRunnersResponse } from "./types/types";
 import { awaitWithRetry, joinList } from "./util/util";
 
-export async function getMatchingRunners(
+export async function getMatchingOnlineRunners(
     githubPat: string, runnerLocation: RunnerLocation, requiredLabels: string[]
-): Promise<SelfHostedRunner[] | undefined> {
+): Promise<SelfHostedRunner[]> {
     const selfHostedRunnersResponse = await listSelfHostedRunners(githubPat, runnerLocation);
 
     core.info(`${runnerLocation.toString()} has ${selfHostedRunnersResponse.total_count} runners.`);
 
     if (selfHostedRunnersResponse.total_count === 0) {
-        return undefined;
+        return [];
     }
 
     core.info(`Looking for runner with labels: ${joinList(requiredLabels.map((label) => `"${label}"`))}`);
 
-    const matchingRunners = selfHostedRunnersResponse.runners.filter((runner) => {
+    const matchingOnlineRunners = selfHostedRunnersResponse.runners.filter((runner) => {
         const runnerLabels = runner.labels.map((label) => label.name);
         core.info(`${runner.name} has labels: ${runnerLabels.map((label) => `"${label}"`).join(", ")}`);
 
@@ -39,57 +39,75 @@ export async function getMatchingRunners(
             }
         });
 
-        const totalMatch = missingLabels.length === 0;
-        if (totalMatch) {
-            core.info(`${runner.name} has all the required labels`);
+        if (missingLabels.length === 0) {
+            // core.info(`${runner.name} has all the required labels`);
+            const isOnline = runner.status === "online";
+            if (isOnline) {
+                core.info(`${runner.name} has the required labels and is online`);
+            }
+            else {
+                core.info(`${runner.name} has all the required labels, but status is ${runner.status}`);
+            }
+            return isOnline;
         }
-        else {
-            const missingLabelsNoun = missingLabels.length > 1 ? "labels" : "label";
-            core.info(
-                `${runner.name} is missing the ${missingLabelsNoun} `
-                + `${joinList(missingLabels.map((l) => `"${l}"`))}`
-            );
-        }
-        return totalMatch;
+
+        const missingLabelsNoun = missingLabels.length > 1 ? "labels" : "label";
+        core.info(
+            `${runner.name} is missing the ${missingLabelsNoun} `
+            + `${joinList(missingLabels.map((l) => `"${l}"`))}`
+        );
+
+        return false;
     });
 
-    if (matchingRunners.length === 0) {
-        core.info(`No runner with all required labels was found.`);
-        return undefined;
-    }
-
-    return matchingRunners;
+    return matchingOnlineRunners;
 }
 
 const WAIT_FOR_RUNNERS_TIMEOUT = 60;
 
-export async function waitForARunnerToExist(
+export async function waitForARunnerBeOneline(
     githubPat: string, runnerLocation: RunnerLocation, newRunnerNames: string[]
 ): Promise<string> {
-    const noRunnerErrMsg = `None of the expected runners were added to ${runnerLocation} `
-        + `within ${WAIT_FOR_RUNNERS_TIMEOUT}s`;
+    const noRunnerErrMsg = `None of the new runners were added to ${runnerLocation} `
+        + `within ${WAIT_FOR_RUNNERS_TIMEOUT}s. Check if the pods failed to start, or exited.`;
 
     core.info(`Waiting for one of the new runners to come up: ${joinList(newRunnerNames, "or")}`);
 
+    const newOfflineRunners: string[] = [];
+
     return awaitWithRetry<string>(
         WAIT_FOR_RUNNERS_TIMEOUT, 5,
-        `Waiting for runners to become available...`, noRunnerErrMsg,
+        `Waiting a runner to become available...`, noRunnerErrMsg,
         async (resolve) => {
-            const existingRunners = await listSelfHostedRunners(githubPat, runnerLocation);
-            const existingRunnerNames = existingRunners.runners.map((runner) => runner.name);
-            if (existingRunnerNames.length > 0) {
-                core.info(`${runnerLocation} runners are: ${joinList(existingRunnerNames)}`);
+            const runners = await listSelfHostedRunners(githubPat, runnerLocation);
+            if (runners.runners.length > 0) {
+                const runnersWithStatus = runners.runners.map((runner) => `${runner.name} (${runner.status})`);
+                core.info(`${runnerLocation} runners are: ${joinList(runnersWithStatus)}`);
             }
             else {
                 core.info(`${runnerLocation} has no runners.`);
             }
 
-            const newRunnerName = existingRunnerNames
-                .find((existingRunnerName) => newRunnerNames.includes(existingRunnerName));
+            const runnerNames = runners.runners.map((runner) => runner.name);
+            // look for one of the new runners to be known by github
+            const newRunnerIndex = runnerNames
+                .findIndex((existingRunnerName) => newRunnerNames.includes(existingRunnerName));
 
-            if (newRunnerName != null) {
-                core.info(`Found new runner ${newRunnerName}`);
-                resolve(newRunnerName);
+            if (newRunnerIndex !== -1) {
+                // this is one of the newly created runners
+                const newRunner = runners.runners[newRunnerIndex];
+                core.info(`Found new runner ${newRunner.name}`);
+
+                // if the runner is online, we are good and we return it
+                if (newRunner.status === "online") {
+                    resolve(newRunner.name);
+                }
+                // else, we have to log a warning, because this usually means the runner configured but then crashed
+                // but, only log one warning per runner.
+                else if (!newOfflineRunners.includes(newRunner.name)) {
+                    core.warning(`New running ${newRunner.name} connected to GitHub but is ${newRunner.status}`);
+                    newOfflineRunners.push(newRunner.name);
+                }
             }
         }
     );
