@@ -13,23 +13,17 @@ jobs:
         with:
           openshift_server_url: ${{ secrets.OPENSHIFT_SANDBOX_URL }}
           openshift_token: ${{ secrets.TIM_OPENSHIFT_TOKEN }}
-          namespace: tetchell-dev
           insecure_skip_tls_verify: true
 
       - name: Install self hosted runner into org
         uses: ./
         with:
           github_pat: ${{ secrets.ORG_TOKEN }}
-          namespace: tetchell-code
           runner_location: redhat-actions
           runner_labels: org-label, org-label-2
-          runner_image: quay.io/redhat-github-actions/runner
-          runner_tag: latest
-          helm_release_name: tim-org-runner
           runner_replicas: 2
           helm_extra_args: |
             --set-string secretName=github-org-pat
-            --set-string secretKeyName=my-org-pat
 
   test-selfhosted:
     runs-on: [ self-hosted, org-label, org-label-2 ]

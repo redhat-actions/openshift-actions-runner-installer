@@ -19,10 +19,8 @@ jobs:
       - name: Install self hosted runner into repository
         uses: ./
         with:
-          # runner_location: ${{ github.repository }}
           github_pat: ${{ secrets.REPO_TOKEN }}
           runner_labels: repo-label, repo-label-2
-          # helm_release_name: tim-repo-runner
 
   test-selfhosted:
     runs-on: [ self-hosted, repo-label, repo-label-2 ]
