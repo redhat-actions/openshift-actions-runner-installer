@@ -15,7 +15,9 @@ export async function getMatchingOnlineRunners(
 ): Promise<SelfHostedRunner[]> {
     const selfHostedRunnersResponse = await listSelfHostedRunners(githubPat, runnerLocation);
 
-    core.info(`${runnerLocation.toString()} has ${selfHostedRunnersResponse.total_count} runners.`);
+    const noRunners = selfHostedRunnersResponse.total_count;
+
+    core.info(`${runnerLocation.toString()} has ${noRunners} runner${noRunners !== 1 ? "s" : ""}.`);
 
     if (selfHostedRunnersResponse.total_count === 0) {
         return [];
