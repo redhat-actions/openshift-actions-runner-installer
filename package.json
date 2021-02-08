@@ -22,9 +22,10 @@
     "@actions/io": "^1.0.2"
   },
   "devDependencies": {
-    "@redhat-actions/action-io-generator": "^1.2.0",
-    "@redhat-actions/eslint-config": "^1.2.10",
+    "@redhat-actions/action-io-generator": "^1.5.0",
+    "@redhat-actions/eslint-config": "^1.2.13",
     "@redhat-actions/tsconfig": "^1.1.1",
+    "@redhat-actions/webpack-config": "^1.2.0",
     "@types/node": "^12.19.15",
     "@typescript-eslint/eslint-plugin": "^4.14.1",
     "@typescript-eslint/parser": "^4.14.1",
