@@ -27,6 +27,7 @@
     "@redhat-actions/tsconfig": "^1.1.1",
     "@redhat-actions/webpack-config": "^1.2.0",
     "@types/node": "^12.19.15",
+    "@types/terser-webpack-plugin": "^5.0.2",
     "@typescript-eslint/eslint-plugin": "^4.14.1",
     "@typescript-eslint/parser": "^4.14.1",
     "eslint": "^7.18.0",
