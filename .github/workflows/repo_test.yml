@@ -1,5 +1,5 @@
 name: Test self-hosted runner in repo
-on: [ push, workflow_dispatch ]
+on: [ push, workflow_dispatch, pull_request_target ]
 
 jobs:
   install-runner:
