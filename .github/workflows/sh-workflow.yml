@@ -1,0 +1,10 @@
+name: Self-hosted runner workflow
+on: [ workflow_dispatch ]
+
+jobs:
+  test-selfhosted:
+    runs-on: self-hosted
+
+    steps:
+      - run: "hostname"
+      - run: "ls -lA"
