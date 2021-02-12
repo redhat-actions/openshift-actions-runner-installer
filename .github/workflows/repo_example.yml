@@ -17,6 +17,7 @@ jobs:
           insecure_skip_tls_verify: true
 
       - name: Install self hosted runner into repository
+        id: install-runners
         # uses: redhat-actions/containized-runner-installer@v1
         # Test the checked-out version of this runner - a user would need the above 'uses'.
         uses: ./
@@ -33,6 +34,14 @@ jobs:
 
           # Give the runner these two labels (which are required by the workflow below)
           runner_labels: repo-label, repo-label-2
+
+      - name: Echo outputs
+        shell: bash
+        run: |
+          [ -n "${{ steps.install-runners.outputs.installed }}" ]
+          echo ${{ steps.install-runners.outputs.installed }}
+          [ -n "${{ steps.install-runners.outputs.runners }}" ]
+          echo ${{ toJSON(steps.install-runners.outputs.runners) }}
 
   test-selfhosted:
     name: Self Hosted Workflow

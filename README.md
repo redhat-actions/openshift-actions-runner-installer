@@ -31,7 +31,10 @@ Note that the default workflow token `secrets.GITHUB_TOKEN` does **not** have th
 | helm_extra_args | Arbitrary arguments to append to the <code>helm&nbsp;upgrade&nbsp;‑‑install</code> command. Refer to the [Chart README](https://github.com/redhat-actions/openshift-actions-runner-chart). <br>Separate items by newline. Do not quote the arguments since `@actions/exec` manages quoting. | None |
 
 ## Outputs
-There are no outputs, but maybe there should be. Runner name(s), labels? Would those be useful?
+| Output Name | Description |
+| ----------- | ----------- |
+| installed | Boolean value indicating if the runners were installed (installed=true), or already present (installed=false). |
+| runners | JSON-parseable array of the matching runners' names, whether they were installed by this action or not. |
 
 ## Example Workflows
 Refer to the [**Repository Example**](./.github/workflows/repo_example.yml) and [**Organiziation Example**](./.github/workflows/org_example.yml).

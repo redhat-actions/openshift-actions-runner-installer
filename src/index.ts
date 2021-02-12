@@ -8,17 +8,20 @@ import * as core from "@actions/core";
 import installRunner from "./install-runner";
 import { joinList } from "./util/util";
 import processInputs from "./process-inputs";
-import { getMatchingOnlineRunners, waitForARunnerBeOneline } from "./get-runners";
+import { getMatchingOnlineRunners, waitForRunnersToBeOnline } from "./get-runners";
+import { Outputs } from "./generated/inputs-outputs";
 
 export async function run(): Promise<void> {
     const runnerConfig = processInputs();
     core.debug(`INPUTS:`);
     core.debug(JSON.stringify(runnerConfig, undefined, 2));
+
     const taggedImage = `${runnerConfig.runnerImage}:${runnerConfig.runnerTag}`;
 
     core.info(`Fetching self-hosted runners for ${runnerConfig.runnerLocation}`);
 
     const matchingOnlineRunners = await getMatchingOnlineRunners(
+        // We label our runners with the taggedImage so that runner using the wrong image are not counted.
         runnerConfig.githubPat, runnerConfig.runnerLocation, runnerConfig.runnerLabels.concat(taggedImage),
     );
 
@@ -30,6 +33,9 @@ export async function run(): Promise<void> {
         else {
             core.info(`✅ Runners ${joinList(runnerNames)} match the given labels.`);
         }
+
+        core.setOutput(Outputs.INSTALLED, false);
+        core.setOutput(Outputs.RUNNERS, JSON.stringify(runnerNames));
         return;
     }
 
@@ -39,11 +45,21 @@ export async function run(): Promise<void> {
     const installedRunnerPodnames = await installRunner(runnerConfig);
     core.debug(`installedRunnerPodnames are ${installedRunnerPodnames}`);
 
-    const newRunner = await waitForARunnerBeOneline(
-        runnerConfig.githubPat, runnerConfig.runnerLocation, installedRunnerPodnames
+    // at present, the runner names == their hostnames === their pod names
+    const newRunnerNames = installedRunnerPodnames;
+
+    const newRunners = await waitForRunnersToBeOnline(
+        runnerConfig.githubPat, runnerConfig.runnerLocation, newRunnerNames
     );
 
-    core.info(`Success: new self-hosted runner ${newRunner} is up and running.`);
+    const plural = newRunners.length !== 1;
+    core.info(
+        `Success: new self-hosted runner${plural ? "s" : ""} `
+        + `${joinList(newRunners)} ${plural ? "are" : "is"} up and running.`
+    );
+
+    core.setOutput(Outputs.INSTALLED, true);
+    core.setOutput(Outputs.RUNNERS, JSON.stringify(newRunners));
 }
 
 run().catch((err) => core.setFailed(err.message));

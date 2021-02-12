@@ -67,50 +67,63 @@ export async function getMatchingOnlineRunners(
 
 const WAIT_FOR_RUNNERS_TIMEOUT = 60;
 
-export async function waitForARunnerBeOneline(
+export async function waitForRunnersToBeOnline(
     githubPat: string, runnerLocation: RunnerLocation, newRunnerNames: string[]
-): Promise<string> {
+): Promise<string[]> {
     const noRunnerErrMsg = `None of the new runners were added to ${runnerLocation} `
         + `within ${WAIT_FOR_RUNNERS_TIMEOUT}s. Check if the pods failed to start, or exited.`;
 
     core.info(`Waiting for one of the new runners to come up: ${joinList(newRunnerNames, "or")}`);
 
+    const newOnlineRunners: string[] = [];
     const newOfflineRunners: string[] = [];
 
-    return awaitWithRetry<string>(
+    return awaitWithRetry<string[]>(
         WAIT_FOR_RUNNERS_TIMEOUT, 5,
         `Waiting a runner to become available...`, noRunnerErrMsg,
         async (resolve) => {
-            const runners = await listSelfHostedRunners(githubPat, runnerLocation);
-            if (runners.runners.length > 0) {
-                const runnersWithStatus = runners.runners.map((runner) => `${runner.name} (${runner.status})`);
+            const currentGHRunners = await listSelfHostedRunners(githubPat, runnerLocation);
+            if (currentGHRunners.runners.length > 0) {
+                const runnersWithStatus = currentGHRunners.runners.map((runner) => `${runner.name} (${runner.status})`);
                 core.info(`${runnerLocation} runners are: ${joinList(runnersWithStatus)}`);
             }
             else {
                 core.info(`${runnerLocation} has no runners.`);
             }
 
-            const runnerNames = runners.runners.map((runner) => runner.name);
-            // look for one of the new runners to be known by github
-            const newRunnerIndex = runnerNames
-                .findIndex((existingRunnerName) => newRunnerNames.includes(existingRunnerName));
+            // const currentGHRunnerNames = currentGHRunners.runners.map((runner) => runner.name);
 
-            if (newRunnerIndex !== -1) {
-                // this is one of the newly created runners
-                const newRunner = runners.runners[newRunnerIndex];
-                core.info(`Found new runner ${newRunner.name}`);
+            // collect the runners that have not yet appeared as online or offline
+            const unresolvedRunners = newRunnerNames.filter(
+                (newRunner) => !newOnlineRunners.includes(newRunner) && !newOfflineRunners.includes(newRunner)
+            );
 
-                // if the runner is online, we are good and we return it
-                if (newRunner.status === "online") {
-                    resolve(newRunner.name);
-                }
-                // else, we have to log a warning, because this usually means the runner configured but then crashed
-                // but, only log one warning per runner.
-                else if (!newOfflineRunners.includes(newRunner.name)) {
-                    core.warning(`New running ${newRunner.name} connected to GitHub but is ${newRunner.status}`);
-                    newOfflineRunners.push(newRunner.name);
-                }
+            if (unresolvedRunners.length === 0) {
+                // all runners have been accounted for
+                resolve(newOnlineRunners);
             }
+
+            unresolvedRunners.forEach((newRunnerName) => {
+                // look for one of the new runners to be known by github
+                const newRunnerIndex = currentGHRunners.runners
+                    .map((runner) => runner.name)
+                    .findIndex((runnerName) => runnerName === newRunnerName);
+
+                if (newRunnerIndex !== -1) {
+                    const newRunner = currentGHRunners.runners[newRunnerIndex];
+                    // if the runner is online, we are good and we return it
+                    if (newRunner.status === "online") {
+                        core.info(`✅ ${newRunner.name} is online`);
+                        newOnlineRunners.push(newRunner.name);
+                    }
+                    // else, we have to log a warning, because this usually means the runner configured but then crashed
+                    // but, only log one warning per runner.
+                    else if (!newOfflineRunners.includes(newRunner.name)) {
+                        core.warning(`New runner ${newRunner.name} connected to GitHub but is ${newRunner.status}`);
+                        newOfflineRunners.push(newRunner.name);
+                    }
+                }
+            });
         }
     );
 }

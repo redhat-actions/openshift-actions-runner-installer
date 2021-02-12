@@ -62,4 +62,16 @@ export enum Inputs {
 }
 
 export enum Outputs {
+    /**
+     * Boolean value indicating if the runners were installed (installed=true), or already present (installed=false).
+     * Required: false
+     * Default: None.
+     */
+    INSTALLED = "installed",
+    /**
+     * JSON-parseable array of the runner names, whether they were installed or not.
+     * Required: false
+     * Default: None.
+     */
+    RUNNERS = "runners",
 }

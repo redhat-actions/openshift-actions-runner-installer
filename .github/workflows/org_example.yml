@@ -18,6 +18,7 @@ jobs:
 
       # Install self-
       - name: Install self hosted runner into org
+        id: install-runners
         # uses: redhat-actions/containized-runner-installer@v1
         # Test the checked-out version of this runner - a user would need the above 'uses'.
         uses: ./
@@ -43,6 +44,15 @@ jobs:
 
           # Refer to the helm chart https://github.com/redhat-actions/openshift-actions-runner-chart
           # for values you can override.
+
+      - name: Echo outputs
+        shell: bash
+        run: |
+          [ -n "${{ steps.install-runners.outputs.installed }}" ]
+          echo ${{ steps.install-runners.outputs.installed }}
+          [ -n "${{ steps.install-runners.outputs.runners }}" ]
+          echo ${{ toJSON(steps.install-runners.outputs.runners) }}
+
 
   test-org-selfhosted:
     name: Self Hosted Workflow

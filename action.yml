@@ -43,6 +43,11 @@ inputs:
       Any other arguments to pass to the 'helm upgrade --install' command.
       Separate arguments by newline. Do not use quotes - @actions/exec will do the quoting for you.
     required: false
+outputs:
+  installed:
+    description: Boolean value indicating if the runners were installed (installed=true), or already present (installed=false).
+  runners:
+    description: JSON-parseable array of the runner names, whether they were installed or not.
 runs:
   using: 'node12'
   main: 'dist/index.js'
