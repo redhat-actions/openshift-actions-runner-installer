@@ -1,0 +1,54 @@
+name: Install Self Hosted Runner into redhat-actions
+on: [ push, workflow_dispatch ]
+
+jobs:
+  install-org-runner:
+    runs-on: ubuntu-20.04
+    name: Install runner into organization
+    steps:
+      - name: Checkout action
+        uses: actions/checkout@v2
+
+      # Log into our K8s (openshift) cluster
+      - uses: redhat-actions/oc-login@v1.1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SANDBOX_URL }}
+          openshift_token: ${{ secrets.TIM_OPENSHIFT_TOKEN }}
+          insecure_skip_tls_verify: true
+
+      # Install self-
+      - name: Install self hosted runner into org
+        # uses: redhat-actions/containized-runner-installer@v1
+        # Test the checked-out version of this runner - a user would need the above 'uses'.
+        uses: ./
+        with:
+          # This token has 'repo' and 'admin:org' permissions
+          github_pat: ${{ secrets.ORG_TOKEN }}
+
+          # This runner will be added to the "redhat-actions" organization.
+          runner_location: redhat-actions
+
+          # Give the runner these two labels (which are required by the workflow below)
+          runner_labels: org-label, org-label-2
+
+          # Create 2 replicas so we can run jobs in parallel
+          runner_replicas: 2
+
+          # Instruct the helm chart to use a custom secret name,
+          # so it doesn't conflict with the secret the repo example uses,
+          # and inject a custom environment variable into the containers.
+          helm_extra_args: |
+            --set-string secretName=github-org-pat
+            --set runnerEnv[0].name="MY_ENV_VAR" --set runnerEnv[0].value="my_env_value"
+
+          # Refer to the helm chart https://github.com/redhat-actions/openshift-actions-runner-chart
+          # for values you can override.
+
+  test-org-selfhosted:
+    name: Self Hosted Workflow
+    runs-on: [ self-hosted, org-label, org-label-2 ]
+    needs: install-org-runner
+
+    steps:
+      - run: hostname
+      - run: ls -Al

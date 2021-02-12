@@ -1,0 +1,44 @@
+name: Install Self Hosted Runner into this repository
+on: [ push, workflow_dispatch ]
+
+jobs:
+  install-repo-runner:
+    runs-on: ubuntu-20.04
+    name: Install runner into this repository
+    steps:
+      - name: Checkout action
+        uses: actions/checkout@v2
+
+      - uses: redhat-actions/oc-login@v1.1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SANDBOX_URL }}
+          openshift_token: ${{ secrets.TIM_OPENSHIFT_TOKEN }}
+          namespace: tetchell-code
+          insecure_skip_tls_verify: true
+
+      - name: Install self hosted runner into repository
+        # uses: redhat-actions/containized-runner-installer@v1
+        # Test the checked-out version of this runner - a user would need the above 'uses'.
+        uses: ./
+        with:
+          # This token has 'repo' permissions
+          github_pat: ${{ secrets.REPO_TOKEN }}
+
+          # This runner will be added to this repository.
+          # The current workflow's repository is the default, so we can omit this input.
+          runner_location: redhat-actions/containerized-actions-runner-installer
+
+          # Create 2 replicas so we can run jobs in parallel
+          runner_replicas: 2
+
+          # Give the runner these two labels (which are required by the workflow below)
+          runner_labels: repo-label, repo-label-2
+
+  test-selfhosted:
+    name: Self Hosted Workflow
+    runs-on: [ self-hosted, repo-label, repo-label-2 ]
+    needs: install-repo-runner
+
+    steps:
+      - run: hostname
+      - run: ls -Al
