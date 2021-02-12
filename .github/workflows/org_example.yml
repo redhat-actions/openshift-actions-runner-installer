@@ -1,4 +1,4 @@
-name: Install Self Hosted Runner into redhat-actions
+name: Install into redhat-actions
 on: [ push, workflow_dispatch ]
 
 jobs:

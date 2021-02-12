@@ -1,4 +1,4 @@
-name: Install Self Hosted Runner into this repository
+name: Install into repository
 on: [ push, workflow_dispatch ]
 
 jobs:

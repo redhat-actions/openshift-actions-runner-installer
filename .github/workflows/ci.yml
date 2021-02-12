@@ -1,4 +1,4 @@
-name: CI Checks
+name: CI checks
 on: [ push, pull_request_target, workflow_dispatch ]
 
 jobs:
