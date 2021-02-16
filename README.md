@@ -1,5 +1,6 @@
 # OpenShift Actions Runner Installer
 
+[![awesome-runners](https://img.shields.io/badge/listed%20on-awesome--runners-blue.svg)](https://github.com/jonico/awesome-runners)
 [![Install into repository](https://github.com/redhat-actions/openshift-actions-runner-installer/workflows/Install%20into%20repository/badge.svg)](https://github.com/redhat-actions/openshift-actions-runner-installer/actions)
 [![Install into org](https://github.com/redhat-actions/openshift-actions-runner-installer/workflows/Install%20into%20redhat-actions/badge.svg)](https://github.com/redhat-actions/openshift-actions-runner-installer/actions)
 [![CI checks](https://github.com/redhat-actions/openshift-actions-runner-installer/workflows/CI%20Checks/badge.svg)](https://github.com/redhat-actions/openshift-actions-runner-installer/actions)
