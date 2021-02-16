@@ -8,24 +8,26 @@
 [![tag badge](https://img.shields.io/github/v/tag/redhat-actions/openshift-actions-runner-installer)](https://github.com/redhat-actions/openshift-actions-runner-installer/tags)
 [![license badge](https://img.shields.io/github/license/redhat-actions/kn-service-deploy)](./LICENSE)
 
-The OpenShift Self Hosted Actions Runner Installer is a GitHub Action to automatically install self-hosted Actions runner containers into a Kubernetes cluster.
+The OpenShift Self-Hosted Actions Runner Installer is a GitHub Action to automatically install self-hosted Actions runner containers into a Kubernetes cluster.
 
 The action uses the [**OpenShift Actions Runner Chart**](https://github.com/redhat-actions/openshift-actions-runner-chart/) to install one or more runner containers.
 
-By default, the chart installs the [**OpenShift Actions Runner**](https://github.com/redhat-actions/openshift-actions-runner). This image is designed to be extended to install whatever tooling your workflows need. Then, provide your custom image in this action's Inputs.
+By default, the chart installs the [**OpenShift Actions Runner**](https://github.com/redhat-actions/openshift-actions-runner).
+
+This action leverages these two projects to make the self-hosted runner installation on Kubernetes as easy as possible.
 
 If a runner that uses the same image and has any requested labels is already present, the install step will be skipped, so this action can be run as a prerequisite step to the "real" workflow to ensure the runner a workflow needs is available.
+
+While this action, chart and images are developed for and tested on OpenShift, they do not contain any OpenShift specific code and should be compatible with any Kubernetes platform.
 
 ## Prerequisites
 You must have access to a Kubernetes cluster. Visit [openshift.com/try](https://www.openshift.com/try) or sign up for our [Developer Sandbox](https://developers.redhat.com/developer-sandbox).
 
-You must set up a Kubernetes contex in the Actions runner this workflow will run on. If you are using OpenShift, you can use [`oc-login`](https://github.com/redhat-actions/oc-login) to set up the context.
+You must have created a Kubernetes context in the current job. If you are using OpenShift, you can use [**oc-login**](https://github.com/redhat-actions/oc-login) to set up the context.
 
-You must have `helm` and either `oc` or `kubectl` installed. You can use the [`openshift-cli-installer`](https://github.com/redhat-actions/openshift-cli-installer) to install and cache these tools.
+You must have `helm` v3 and either `oc` or `kubectl` installed. You can use the [**OpenShift CLI Installer**](https://github.com/redhat-actions/openshift-cli-installer) to install and cache these tools.
 
-You do **not** need cluster administrator privileges to deploy the runners and run workloads. However, some images or tools may require special permissions or SecurityContexts.
-
-While the installer is developed for and tested on OpenShift, it does not contain any OpenShift specific code, and should be compatible with any Kubernetes platform.
+You do **not** need cluster administrator privileges to deploy the runners and run workloads. However, some images or tools may require special permissions.
 
 ## Inputs
 The only required input is the `github_pat`, which is a ([Personal Access Token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token)), with the appropriate permisions.
@@ -90,3 +92,8 @@ jobs:
 ## Troubleshooting
 
 See the Troubleshooting sections of [the chart README](https://github.com/redhat-actions/openshift-actions-runner-chart#Troubleshooting), and [the runner README](https://github.com/redhat-actions/openshift-actions-runner#Troubleshooting).
+
+The most common errors are due to a missing or misconfigured GitHub PAT. Make sure that:
+- The secret was created correctly
+- The secret is referred to by the correct name in the workflow file
+- The PAT in the secret has the correct permissions
