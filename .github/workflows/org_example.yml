@@ -19,7 +19,7 @@ jobs:
       # Install self-
       - name: Install self hosted runner into org
         id: install-runners
-        # uses: redhat-actions/containized-runner-installer@v1
+        # uses: redhat-actions/openshift-actions-runner-installer@v1
         # Test the checked-out version of this runner - a user would need the above 'uses'.
         uses: ./
         with:

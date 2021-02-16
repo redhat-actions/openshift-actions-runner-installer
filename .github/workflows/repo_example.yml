@@ -18,7 +18,7 @@ jobs:
 
       - name: Install self hosted runner into repository
         id: install-runners
-        # uses: redhat-actions/containized-runner-installer@v1
+        # uses: redhat-actions/openshift-actions-runner-installer@v1
         # Test the checked-out version of this runner - a user would need the above 'uses'.
         uses: ./
         with:
@@ -27,7 +27,7 @@ jobs:
 
           # This runner will be added to this repository.
           # The current workflow's repository is the default, so we can omit this input.
-          runner_location: redhat-actions/containerized-actions-runner-installer
+          runner_location: redhat-actions/openshift-actions-runner-installer
 
           # Create 2 replicas so we can run jobs in parallel
           runner_replicas: 2

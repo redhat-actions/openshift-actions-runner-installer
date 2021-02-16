@@ -1,12 +1,12 @@
 # Containerized Actions Runner Installer
 
 
-[![Install into repository](https://github.com/redhat-actions/containerized-actions-runner-installer/workflows/Install%20into%20repository/badge.svg)](https://github.com/redhat-actions/containerized-actions-runner-installer/actions)
-[![Install into org](https://github.com/redhat-actions/containerized-actions-runner-installer/workflows/Install%20into%20redhat-actions/badge.svg)](https://github.com/redhat-actions/containerized-actions-runner-installer/actions)
-[![CI checks](https://github.com/redhat-actions/containerized-actions-runner-installer/workflows/CI%20Checks/badge.svg)](https://github.com/redhat-actions/containerized-actions-runner-installer/actions)
-[![Link checker](https://github.com/redhat-actions/containerized-actions-runner-installer/workflows/Link%20checker/badge.svg)](https://github.com/redhat-actions/containerized-actions-runner-installer/actions)
+[![Install into repository](https://github.com/redhat-actions/openshift-actions-runner-installer/workflows/Install%20into%20repository/badge.svg)](https://github.com/redhat-actions/openshift-actions-runner-installer/actions)
+[![Install into org](https://github.com/redhat-actions/openshift-actions-runner-installer/workflows/Install%20into%20redhat-actions/badge.svg)](https://github.com/redhat-actions/openshift-actions-runner-installer/actions)
+[![CI checks](https://github.com/redhat-actions/openshift-actions-runner-installer/workflows/CI%20Checks/badge.svg)](https://github.com/redhat-actions/openshift-actions-runner-installer/actions)
+[![Link checker](https://github.com/redhat-actions/openshift-actions-runner-installer/workflows/Link%20checker/badge.svg)](https://github.com/redhat-actions/openshift-actions-runner-installer/actions)
 
-[![tag badge](https://img.shields.io/github/v/tag/redhat-actions/containerized-actions-runner-installer)](https://github.com/redhat-actions/containerized-actions-runner-installer/tags)
+[![tag badge](https://img.shields.io/github/v/tag/redhat-actions/openshift-actions-runner-installer)](https://github.com/redhat-actions/openshift-actions-runner-installer/tags)
 [![license badge](https://img.shields.io/github/license/redhat-actions/kn-service-deploy)](./LICENSE)
 
 The Containerized Self Hosted Actions Runner Installer is a GitHub Action to automatically install self-hosted Actions runner containers into a Kubernetes cluster.
