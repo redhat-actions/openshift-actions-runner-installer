@@ -93,7 +93,7 @@ jobs:
 ## Removing runners
 As long as the runners terminate gracefully, they will remove themselves from the repository or organization before exiting. So, uninstalling the Helm release is sufficient to remove the runners.
 
-Refer to the [tear down example](./.github/workflows/tear_down_org_runners.yml) and the [organization workflow](./.github/workflows/org_example.yml) for examples.
+Refer to the [tear down example](./.github/workflows/tear_down_runners.yml) and the [organization workflow](./.github/workflows/org_example.yml) for examples.
 
 ## Troubleshooting
 

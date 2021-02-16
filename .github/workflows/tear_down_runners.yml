@@ -1,4 +1,4 @@
-name: Tear down org runners
+name: Tear down repository runners
 on:
   workflow_dispatch:
   schedule:
@@ -7,10 +7,10 @@ on:
 
 jobs:
   tear-down-runners:
-    name: Tear down org runners
+    name: Tear down repository runners
     runs-on: ubuntu-20.04
     env:
-      HELM_RELEASE_NAME: "redhat-actions-runner"
+      HELM_RELEASE_NAME: "openshift-actions-runner-installer-runner"
 
     steps:
       - uses: redhat-actions/oc-login@v1
