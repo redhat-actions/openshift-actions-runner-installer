@@ -52,8 +52,9 @@ Note that the default workflow token `secrets.GITHUB_TOKEN` does **not** have th
 ## Outputs
 | Output Name | Description |
 | ----------- | ----------- |
+| helm_release_name | The name of the Helm release that was created or upgraded.<br>If the runners were present and the upgrade was skipped (that is, `outputs.installed == false`), this value is undefined. |
 | installed | Boolean value indicating if the runners were installed (installed=true), or already present (installed=false). |
-| runners | JSON-parseable array of the matching runners' names, whether they were installed by this action or not. |
+| runners | JSON-parsable array of the matching runners' names, whether they were installed by this action or not. |
 
 ## Example Workflows
 Refer to the [**Repository Example**](./.github/workflows/repo_example.yml) and [**Organiziation Example**](./.github/workflows/org_example.yml).
@@ -73,7 +74,7 @@ jobs:
     name: Install org runner
     steps:
       - name: Install self hosted runner into this repository
-        uses: redhat-actions/containized-runner-installer@v1
+        uses: redhat-actions/openshift-actions-runner-installer@v1
         with:
           github_pat: ${{ secrets.PAT }}
 
@@ -88,6 +89,11 @@ jobs:
       - run: hostname
       - run: ls -Al
 ```
+
+## Removing runners
+As long as the runners terminate gracefully, they will remove themselves from the repository or organization before exiting. So, uninstalling the Helm release is sufficient to remove the runners.
+
+Refer to the [tear down example](./.github/workflows/tear_down_org_runners.yml) and the [organization workflow](./.github/workflows/org_example.yml) for examples.
 
 ## Troubleshooting
 

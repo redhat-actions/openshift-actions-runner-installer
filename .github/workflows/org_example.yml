@@ -1,16 +1,22 @@
 name: Install into redhat-actions
 on: [ push, workflow_dispatch ]
 
+env:
+  TEAR_DOWN_RUNNERS: true
+
 jobs:
   install-org-runner:
     runs-on: ubuntu-20.04
     name: Install runner into organization
+    outputs:
+      helm_release_name: ${{ steps.install-runners.outputs.helm_release_name }}
+
     steps:
       - name: Checkout action
         uses: actions/checkout@v2
 
       # Log into our K8s (openshift) cluster
-      - uses: redhat-actions/oc-login@v1.1
+      - uses: redhat-actions/oc-login@v1
         with:
           openshift_server_url: ${{ secrets.OPENSHIFT_SANDBOX_URL }}
           openshift_token: ${{ secrets.TIM_OPENSHIFT_TOKEN }}
@@ -48,11 +54,7 @@ jobs:
       - name: Echo outputs
         shell: bash
         run: |
-          [ -n "${{ steps.install-runners.outputs.installed }}" ]
-          echo ${{ steps.install-runners.outputs.installed }}
-          [ -n "${{ steps.install-runners.outputs.runners }}" ]
-          echo ${{ toJSON(steps.install-runners.outputs.runners) }}
-
+          echo "${{ toJSON(steps.install-runners.outputs) }}"
 
   test-org-selfhosted:
     name: Self Hosted Workflow
@@ -62,3 +64,20 @@ jobs:
     steps:
       - run: hostname
       - run: ls -Al
+
+  teardown-org-runner:
+    name: Tear down self-hosted runners
+    runs-on: ubuntu-20.04
+    needs: [ install-org-runner, test-org-selfhosted ]
+    if: needs.install-org-runner.outputs.helm_release_name != ''
+
+    steps:
+      - uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SANDBOX_URL }}
+          openshift_token: ${{ secrets.TIM_OPENSHIFT_TOKEN }}
+          insecure_skip_tls_verify: true
+
+      - run: helm ls
+      - name: Clean up self-hosted runners
+        run: helm uninstall ${{ needs.install-org-runner.outputs.helm_release_name }}

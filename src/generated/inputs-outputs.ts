@@ -63,6 +63,13 @@ export enum Inputs {
 
 export enum Outputs {
     /**
+     * The name of the Helm release that was created/upgraded.
+     * If a matching runner was already present, the Helm upgrade is skipped, and this value is undefined.
+     * Required: false
+     * Default: None.
+     */
+    HELM_RELEASE_NAME = "helm_release_name",
+    /**
      * Boolean value indicating if the runners were installed (installed=true), or already present (installed=false).
      * Required: false
      * Default: None.

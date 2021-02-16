@@ -9,7 +9,7 @@ jobs:
       - name: Checkout action
         uses: actions/checkout@v2
 
-      - uses: redhat-actions/oc-login@v1.1
+      - uses: redhat-actions/oc-login@v1
         with:
           openshift_server_url: ${{ secrets.OPENSHIFT_SANDBOX_URL }}
           openshift_token: ${{ secrets.TIM_OPENSHIFT_TOKEN }}
@@ -38,10 +38,7 @@ jobs:
       - name: Echo outputs
         shell: bash
         run: |
-          [ -n "${{ steps.install-runners.outputs.installed }}" ]
-          echo ${{ steps.install-runners.outputs.installed }}
-          [ -n "${{ steps.install-runners.outputs.runners }}" ]
-          echo ${{ toJSON(steps.install-runners.outputs.runners) }}
+          echo "${{ toJSON(steps.install-runners.outputs) }}"
 
   test-selfhosted:
     name: Self Hosted Workflow

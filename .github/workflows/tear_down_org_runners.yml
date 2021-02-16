@@ -1,0 +1,29 @@
+name: Tear down org runners
+on:
+  workflow_dispatch:
+  schedule:
+    # Every sunday night
+    - cron: "* 23 * * 0"
+
+jobs:
+  tear-down-runners:
+    name: Tear down org runners
+    runs-on: ubuntu-20.04
+    env:
+      HELM_RELEASE_NAME: "redhat-actions-runner"
+
+    steps:
+      - uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SANDBOX_URL }}
+          openshift_token: ${{ secrets.TIM_OPENSHIFT_TOKEN }}
+          insecure_skip_tls_verify: true
+
+      - run: helm ls
+
+      # If we were running in the same workflow as the self-hosted runner installation,
+      # we could use ${{ <job>.outputs.helm_release_name }} to get the release name
+      - run: helm status ${{ env.HELM_RELEASE_NAME }} && echo "RELEASE_EXISTS=true" >> $GITHUB_ENV
+
+      - run: helm uninstall ${{ env.HELM_RELEASE_NAME }}
+        if: ${{ env.RELEASE_EXISTS }} == 'true'

@@ -34,6 +34,7 @@ export async function run(): Promise<void> {
             core.info(`✅ Runners ${joinList(runnerNames)} match the given labels.`);
         }
 
+        // Outputs.HELM_RELEASE_NAME is not set here, since we did not do a helm release.
         core.setOutput(Outputs.INSTALLED, false);
         core.setOutput(Outputs.RUNNERS, JSON.stringify(runnerNames));
         return;
@@ -58,6 +59,7 @@ export async function run(): Promise<void> {
         + `${joinList(newRunners)} ${plural ? "are" : "is"} up and running.`
     );
 
+    core.setOutput(Outputs.HELM_RELEASE_NAME, runnerConfig.helmReleaseName);
     core.setOutput(Outputs.INSTALLED, true);
     core.setOutput(Outputs.RUNNERS, JSON.stringify(newRunners));
 }

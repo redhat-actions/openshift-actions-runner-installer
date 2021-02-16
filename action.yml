@@ -44,6 +44,10 @@ inputs:
       Separate arguments by newline. Do not use quotes - @actions/exec will do the quoting for you.
     required: false
 outputs:
+  helm_release_name:
+    description: |
+      The name of the Helm release that was created/upgraded.
+      If a matching runner was already present, the Helm upgrade is skipped, and this value is undefined.
   installed:
     description: Boolean value indicating if the runners were installed (installed=true), or already present (installed=false).
   runners:
