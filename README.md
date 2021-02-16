@@ -1,5 +1,4 @@
-# Containerized Actions Runner Installer
-
+# OpenShift Actions Runner Installer
 
 [![Install into repository](https://github.com/redhat-actions/openshift-actions-runner-installer/workflows/Install%20into%20repository/badge.svg)](https://github.com/redhat-actions/openshift-actions-runner-installer/actions)
 [![Install into org](https://github.com/redhat-actions/openshift-actions-runner-installer/workflows/Install%20into%20redhat-actions/badge.svg)](https://github.com/redhat-actions/openshift-actions-runner-installer/actions)
@@ -9,13 +8,22 @@
 [![tag badge](https://img.shields.io/github/v/tag/redhat-actions/openshift-actions-runner-installer)](https://github.com/redhat-actions/openshift-actions-runner-installer/tags)
 [![license badge](https://img.shields.io/github/license/redhat-actions/kn-service-deploy)](./LICENSE)
 
-The Containerized Self Hosted Actions Runner Installer is a GitHub Action to automatically install self-hosted Actions runner containers into a Kubernetes cluster.
+The OpenShift Self Hosted Actions Runner Installer is a GitHub Action to automatically install self-hosted Actions runner containers into a Kubernetes cluster.
 
 The action uses the [**OpenShift Actions Runner Chart**](https://github.com/redhat-actions/openshift-actions-runner-chart/) to install one or more runner containers.
 
 By default, the chart installs the [**OpenShift Actions Runner**](https://github.com/redhat-actions/openshift-actions-runner). This image is designed to be extended to install whatever tooling your workflows need. Then, provide your custom image in this action's Inputs.
 
 If a runner that uses the same image and has any requested labels is already present, the install step will be skipped, so this action can be run as a prerequisite step to the "real" workflow to ensure the runner a workflow needs is available.
+
+## Prerequisites
+You must have access to a Kubernetes cluster. Visit [openshift.com/try](https://www.openshift.com/try) or sign up for our [Developer Sandbox](https://developers.redhat.com/developer-sandbox).
+
+You must set up a Kubernetes contex in the Actions runner this workflow will run on. If you are using OpenShift, you can use [`oc-login`](https://github.com/redhat-actions/oc-login) to set up the context.
+
+You must have `helm` and either `oc` or `kubectl` installed. You can use the [`openshift-cli-installer`](https://github.com/redhat-actions/openshift-cli-installer) to install and cache these tools.
+
+You do **not** need cluster administrator privileges to deploy the runners and run workloads. However, some images or tools may require special permissions or SecurityContexts.
 
 While the installer is developed for and tested on OpenShift, it does not contain any OpenShift specific code, and should be compatible with any Kubernetes platform.
 
@@ -54,7 +62,7 @@ All other inputs are optional.
 
 ### Minimal Example
 ```yaml
-name: Containerized Self-Hosted Workflow
+name: OpenShift Self-Hosted Installer Workflow
 on: [ push, workflow_dispatch ]
 
 jobs:
@@ -70,7 +78,7 @@ jobs:
   self-hosted-workflow:
     # Now that the above job has ensured the runner container exists,
     # we can run our workflow inside it.
-    name: Containized Self Hosted Workflow
+    name: OpenShift Self Hosted Workflow
     runs-on: [ self-hosted ]
     needs: install-runner
 
