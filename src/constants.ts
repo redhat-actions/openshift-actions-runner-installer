@@ -8,12 +8,8 @@ namespace Constants {
     export const DEFAULT_IMG_TAG = "v1.0.0";
 
     export const CHART_REPO_NAME = "openshift-actions-runner-chart";
-    export const CHART_REPO_URL = `https://github.com/redhat-actions/${CHART_REPO_NAME}`;
-    export const CHART_REPO_REF = "v1.0.0";
-    /**
-     * Path to the chart relative to the root of the CHART_REPO
-     */
-    export const CHART_RELATIVE_PATH = "./actions-runner/";
+    export const CHART_NAME = "actions-runner";
+    export const CHART_REPO_URL = `https://redhat-actions.github.io/openshift-actions-runner-chart/`;
     export const RELEASE_NAME_LABEL = "app.kubernetes.io/instance";
 }
 

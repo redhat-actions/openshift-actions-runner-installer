@@ -3,43 +3,12 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  **************************************************************************************************/
 
-import * as core from "@actions/core";
 import * as io from "@actions/io";
-import * as path from "path";
 
 import exec from "./util/exec";
 import Constants from "./constants";
 import { RunnerConfiguration } from "./types/types";
 import getAndWaitForPods from "./wait-for-pods";
-
-export default async function installRunner(config: RunnerConfiguration): Promise<string[]> {
-    const gitPath = await io.which("git", true);
-
-    const chartCloneDir = path.join(process.cwd(), `${Constants.CHART_REPO_NAME}-${Date.now()}/`);
-    await exec(gitPath, [
-        "clone",
-        "--depth", "1",
-        "--branch", Constants.CHART_REPO_REF,
-        Constants.CHART_REPO_URL, chartCloneDir,
-    ]);
-
-    await exec(gitPath, [
-        "-C", chartCloneDir,
-        "log", "-1",
-    ]);
-
-    const chartDir = path.resolve(chartCloneDir, Constants.CHART_RELATIVE_PATH);
-
-    try {
-        await runHelmInstall(path.relative(".", chartDir), config);
-    }
-    finally {
-        core.info(`Removing ${chartCloneDir}`);
-        await io.rmRF(chartCloneDir);
-    }
-
-    return getAndWaitForPods(config.helmReleaseName, config.runnerReplicas, config.namespace);
-}
 
 enum HelmValueNames {
     RUNNER_IMAGE = "runnerImage",
@@ -51,8 +20,13 @@ enum HelmValueNames {
     GITHUB_REPO = "githubRepository",
 }
 
-async function runHelmInstall(chartDir: string, config: RunnerConfiguration): Promise<void> {
+export default async function runHelmInstall(config: RunnerConfiguration): Promise<string[]> {
     const helmPath = await io.which("helm", true);
+
+    await exec(helmPath, [ "repo", "add", Constants.CHART_REPO_NAME, Constants.CHART_REPO_URL ]);
+    await exec(helmPath, [ "repo", "list" ]);
+    await exec(helmPath, [ "repo", "update" ]);
+    await exec(helmPath, [ "search", "repo", Constants.CHART_NAME ]);
 
     const namespaceArgs = config.namespace ? [ "--namespace", config.namespace ] : [];
 
@@ -64,7 +38,7 @@ async function runHelmInstall(chartDir: string, config: RunnerConfiguration): Pr
         "--install",
         // "--debug",
         config.helmReleaseName,
-        chartDir,
+        Constants.CHART_REPO_NAME + "/" + Constants.CHART_NAME,
         ...namespaceArgs,
         "--set-string", `${HelmValueNames.RUNNER_IMAGE}=${config.runnerImage}`,
         "--set-string", `${HelmValueNames.RUNNER_TAG}=${config.runnerTag}`,
@@ -93,4 +67,6 @@ async function runHelmInstall(chartDir: string, config: RunnerConfiguration): Pr
 
     await exec(helmPath, helmUpgradeArgs);
     await exec(helmPath, [ "get", "manifest", config.helmReleaseName, ...namespaceArgs ], { group: true });
+
+    return getAndWaitForPods(config.helmReleaseName, config.runnerReplicas, config.namespace);
 }
