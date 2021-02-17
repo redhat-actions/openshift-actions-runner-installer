@@ -31,7 +31,7 @@ You must have `helm` v3 and either `oc` or `kubectl` installed. You can use the 
 You do **not** need cluster administrator privileges to deploy the runners and run workloads. However, some images or tools may require special permissions.
 
 ## Inputs
-The only required input is the `github_pat`, which is a ([Personal Access Token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token)), with the appropriate permisions.
+The only required input is the `github_pat`, which is a [Personal Access Token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token), with the appropriate permisions.
 
 The token must have the `repo` permission scope. For organization runners, the token must also have the `admin:org` scope. Refer to the Runner [README](https://github.com/redhat-actions/openshift-actions-runner#pat-guidelines).
 
