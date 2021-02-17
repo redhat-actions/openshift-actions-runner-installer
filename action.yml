@@ -43,6 +43,9 @@ inputs:
       Any other arguments to pass to the 'helm upgrade --install' command.
       Separate arguments by newline. Do not use quotes - @actions/exec will do the quoting for you.
     required: false
+  helm_chart_version:
+    description: Version of our Helm Chart to install. Defaults to the latest.
+    required: false
 outputs:
   helm_release_name:
     description: |

@@ -54,6 +54,11 @@ export default function processInputs(): RunnerConfiguration {
         helmExtraArgs = lines.flatMap((line) => line.split(" ")).map((arg) => arg.trim());
     }
 
+    let helmChartVersion: string | undefined = core.getInput(Inputs.HELM_CHART_VERSION);
+    if (helmChartVersion === "") {
+        helmChartVersion = undefined;
+    }
+
     let namespace: string | undefined = core.getInput(Inputs.NAMESPACE);
     if (namespace === "") {
         namespace = undefined;
@@ -63,6 +68,7 @@ export default function processInputs(): RunnerConfiguration {
 
     return {
         githubPat,
+        helmChartVersion,
         helmExtraArgs,
         helmReleaseName,
         runnerImage,

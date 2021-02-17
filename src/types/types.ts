@@ -37,6 +37,7 @@ export interface SelfHostedRunnersResponse {
  */
 export interface RunnerConfiguration {
     namespace?: string | undefined;
+    helmChartVersion: string | undefined;
     helmExtraArgs: string[];
     helmReleaseName: string;
     githubPat: string;

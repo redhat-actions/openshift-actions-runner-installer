@@ -46,9 +46,10 @@ Note that the default workflow token `secrets.GITHUB_TOKEN` does **not** have th
 | runner_tag | Tag to use for the runner container image. | `v1.0.0` |
 | runner_labels | [Labels](https://docs.github.com/en/actions/hosting-your-own-runners/using-labels-with-self-hosted-runners) to add to the self-hosted runner. Must be comma-separated, spaces after commas optional. | None |
 | runner_replicas | Number of replicas of the container to create. Each replica is its own runner. | 1
-| namespace | Optional Kubernetes namespace to pass to all Helm and Kubernetes comands.  | None |
+| namespace | Optional Kubernetes namespace to pass to all Helm and Kube client comands.  | None |
 | helm_release_name | The Helm release name to use. | Runner location |
 | helm_extra_args | Arbitrary arguments to append to the <code>helm&nbsp;upgrade&nbsp;‑‑install</code> command. Refer to the [Chart README](https://github.com/redhat-actions/openshift-actions-runner-chart). <br>Separate items by newline. Do not quote the arguments since `@actions/exec` manages quoting. | None |
+| helm_chart_version | Version of our [Helm Chart](https://github.com/redhat-actions/openshift-actions-runner-chart) to install. Defaults to the latest. |
 
 ## Outputs
 | Output Name | Description |

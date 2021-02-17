@@ -33,6 +33,8 @@ export default async function runHelmInstall(config: RunnerConfiguration): Promi
     await exec(helmPath, [ "version" ]);
     await exec(helmPath, [ "ls", ...namespaceArgs ]);
 
+    const versionArgs = config.helmChartVersion ? [ "--version", config.helmChartVersion ] : [];
+
     const helmUpgradeArgs: string[] = [
         "upgrade",
         "--install",
@@ -40,6 +42,7 @@ export default async function runHelmInstall(config: RunnerConfiguration): Promi
         config.helmReleaseName,
         Constants.CHART_REPO_NAME + "/" + Constants.CHART_NAME,
         ...namespaceArgs,
+        ...versionArgs,
         "--set-string", `${HelmValueNames.RUNNER_IMAGE}=${config.runnerImage}`,
         "--set-string", `${HelmValueNames.RUNNER_TAG}=${config.runnerTag}`,
         "--set-string", `${HelmValueNames.GITHUB_PAT}=${config.githubPat}`,

@@ -8,6 +8,12 @@ export enum Inputs {
      */
     GITHUB_PAT = "github_pat",
     /**
+     * Version of our Helm Chart to install. Defaults to the latest.
+     * Required: false
+     * Default: None.
+     */
+    HELM_CHART_VERSION = "helm_chart_version",
+    /**
      * Any other arguments to pass to the 'helm upgrade --install' command.
      * Separate arguments by newline. Do not use quotes - @actions/exec will do the quoting for you.
      * Required: false
