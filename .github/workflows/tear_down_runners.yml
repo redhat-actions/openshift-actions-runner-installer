@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   schedule:
     # Every sunday night
-    - cron: "* 23 * * 0"
+    - cron: "0 23 * * SUN"
 
 jobs:
   tear-down-runners:
@@ -23,7 +23,12 @@ jobs:
 
       # If we were running in the same workflow as the self-hosted runner installation,
       # we could use ${{ <job>.outputs.helm_release_name }} to get the release name
-      - run: helm status ${{ env.HELM_RELEASE_NAME }} && echo "RELEASE_EXISTS=true" >> $GITHUB_ENV
+      - run: |
+          if helm status ${{ env.HELM_RELEASE_NAME }}; then
+            echo "RELEASE_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "Release ${{ env.HELM_RELEASE_NAME }} not found"
+          fi
 
       - run: helm uninstall ${{ env.HELM_RELEASE_NAME }}
-        if: ${{ env.RELEASE_EXISTS }} == 'true'
+        if: env.RELEASE_EXISTS == 'true'
