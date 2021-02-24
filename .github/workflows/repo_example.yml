@@ -25,15 +25,23 @@ jobs:
           # This token has 'repo' permissions
           github_pat: ${{ secrets.REPO_TOKEN }}
 
+          helm_release_name: node-runner
+
           # This runner will be added to this repository.
           # The current workflow's repository is the default, so we can omit this input.
           runner_location: redhat-actions/openshift-actions-runner-installer
 
+          # Give the runner these two labels (which are required by the workflow below)
+          runner_labels: node
+
+          # Use this container image for the runner.
+          runner_image: quay.io/redhat-github-actions/node-14-runner
+
+          # Use this tag for the runner_image
+          runner_tag: v1.0.0
+
           # Create 2 replicas so we can run jobs in parallel
           runner_replicas: 2
-
-          # Give the runner these two labels (which are required by the workflow below)
-          runner_labels: repo-label, repo-label-2
 
       - name: Echo outputs
         shell: bash
@@ -41,10 +49,10 @@ jobs:
           echo "${{ toJSON(steps.install-runners.outputs) }}"
 
   test-selfhosted:
-    name: Self Hosted Workflow
-    runs-on: [ self-hosted, repo-label, repo-label-2 ]
+    name: Self Hosted Node Workflow
+    runs-on: [ self-hosted, node ]
     needs: install-repo-runner
 
     steps:
-      - run: hostname
-      - run: ls -Al
+      - run: node --version
+      - run: npm --version
