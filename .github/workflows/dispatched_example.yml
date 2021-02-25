@@ -1,0 +1,13 @@
+name: Self-hosted dispatched workflow
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [ runner_ready ]
+
+jobs:
+  test-selfhosted:
+    runs-on: [ self-hosted ]
+
+    steps:
+      - run: "hostname"
+      - run: "ls -lA"
