@@ -29,7 +29,7 @@ inputs:
     required: false
   runner_replicas:
     description: Number of runner replicas to create.
-    required: true
+    required: false
     default: "1"
   namespace:
     description: |

@@ -55,7 +55,7 @@ export enum Inputs {
     RUNNER_LOCATION = "runner_location",
     /**
      * Number of runner replicas to create.
-     * Required: true
+     * Required: false
      * Default: "1"
      */
     RUNNER_REPLICAS = "runner_replicas",
