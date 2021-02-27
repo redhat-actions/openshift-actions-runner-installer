@@ -70,17 +70,17 @@ const WAIT_FOR_RUNNERS_TIMEOUT = 60;
 export async function waitForRunnersToBeOnline(
     githubPat: string, runnerLocation: RunnerLocation, newRunnerNames: string[]
 ): Promise<string[]> {
-    const noRunnerErrMsg = `None of the new runners were added to ${runnerLocation} `
+    const noRunnerErrMsg = `Not all of the new runners were added to ${runnerLocation}, or were not online `
         + `within ${WAIT_FOR_RUNNERS_TIMEOUT}s. Check if the pods failed to start, or exited.`;
 
-    core.info(`Waiting for one of the new runners to come up: ${joinList(newRunnerNames, "or")}`);
+    core.info(`Waiting for the new runners to come up: ${joinList(newRunnerNames, "and")}`);
 
     const newOnlineRunners: string[] = [];
     const newOfflineRunners: string[] = [];
 
     return awaitWithRetry<string[]>(
         WAIT_FOR_RUNNERS_TIMEOUT, 5,
-        `Waiting a runner to become available...`, noRunnerErrMsg,
+        `Waiting for runners to come online...`, noRunnerErrMsg,
         async (resolve) => {
             const currentGHRunners = await listSelfHostedRunners(githubPat, runnerLocation);
             if (currentGHRunners.runners.length > 0) {
@@ -101,6 +101,9 @@ export async function waitForRunnersToBeOnline(
             if (unresolvedRunners.length === 0) {
                 // all runners have been accounted for
                 resolve(newOnlineRunners);
+            }
+            else {
+                core.info(`Still waiting for ${joinList(unresolvedRunners)}`);
             }
 
             unresolvedRunners.forEach((newRunnerName) => {
