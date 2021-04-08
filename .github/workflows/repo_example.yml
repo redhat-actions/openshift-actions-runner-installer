@@ -11,9 +11,9 @@ jobs:
 
       - uses: redhat-actions/oc-login@v1
         with:
-          openshift_server_url: ${{ secrets.OPENSHIFT_SANDBOX_URL }}
-          openshift_token: ${{ secrets.TIM_OPENSHIFT_TOKEN }}
-          namespace: tetchell-code
+          openshift_server_url: ${{ secrets.OPENSHIFT_URL }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
           insecure_skip_tls_verify: true
 
       - name: Install self hosted runner into repository
