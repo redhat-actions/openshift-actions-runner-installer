@@ -12,7 +12,7 @@ jobs:
     name: Tear down repository runners
     runs-on: ubuntu-20.04
     env:
-      HELM_RELEASE_NAME: "openshift-actions-runner-installer-runner"
+      HELM_RELEASE_NAME: "node-runner"
 
     steps:
       - uses: redhat-actions/oc-login@v1
