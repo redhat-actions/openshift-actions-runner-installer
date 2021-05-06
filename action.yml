@@ -1,6 +1,6 @@
-name: "Check Self Hosted Runners"
-description: "Check whether a self-hosted runner exists in the given repository or organization."
-author: "Red Hat"
+name: OpenShift Self Hosted Runner Installer
+description: Check for and install self-hosted runners on to your OpenShift cluster
+author: Red Hat
 branding:
   icon: circle
   color: red
