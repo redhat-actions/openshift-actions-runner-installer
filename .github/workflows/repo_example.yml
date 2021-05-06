@@ -1,5 +1,10 @@
 name: Install into repository
-on: [ push, workflow_dispatch ]
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    # nightly 10pm and the teardown workflow runs just after
+    - cron: "0 22 * * *"
 
 jobs:
   install-repo-runner:

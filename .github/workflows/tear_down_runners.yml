@@ -4,8 +4,8 @@ on:
   repository_dispatch:
     types: [ teardown_runners ]
   schedule:
-    # Every sunday night
-    - cron: "0 23 * * SUN"
+    # nightly 1030pm since the repo_example runs at 10
+    - cron: "0 22 30 * *"
 
 jobs:
   tear-down-runners:

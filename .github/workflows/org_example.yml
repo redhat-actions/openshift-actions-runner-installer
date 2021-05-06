@@ -1,5 +1,10 @@
 name: Install into redhat-actions
-on: [ push, workflow_dispatch ]
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    # nightly 10pm. note this workflow cleans up after itself
+    - cron: "0 22 * * *"
 
 env:
   TEAR_DOWN_RUNNERS: true
