@@ -31,7 +31,7 @@ You must have `helm` v3 and either `oc` or `kubectl` installed. You can use the 
 You do **not** need cluster administrator privileges to deploy the runners and run workloads. However, some images or tools may require special permissions.
 
 ## Example Workflows
-Refer to the [**Repository Example**](./.github/workflows/repo_example.yml) and [**Organization Example**](./.github/workflows/org_example.yml).
+Refer to the [**Repository Example**](./.github/workflows/repo_example.yml) and [**Organization Example**](./.github/workflows/org_example.yml). The Repository example is also an example of using a [`repository_dispatch` event](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#repository_dispatch) to trigger a separate workflow, once the runner is ready.
 
 Remember to [create a secret](https://docs.github.com/en/actions/reference/encrypted-secrets) containing the GitHub PAT as detailed above, and pass it in the `github_pat` input. Below, the secret is named `PAT`.
 
@@ -45,7 +45,7 @@ on: [ push, workflow_dispatch ]
 jobs:
   install-runner:
     runs-on: ubuntu-20.04
-    name: Install org runner
+    name: Install runner
     steps:
       - name: Install self hosted runner into this repository
         uses: redhat-actions/openshift-actions-runner-installer@v1
@@ -56,12 +56,14 @@ jobs:
     # Now that the above job has ensured the runner container exists,
     # we can run our workflow inside it.
     name: OpenShift Self Hosted Workflow
+    # Add other labels here if you have to filter by a runner type.
     runs-on: [ self-hosted ]
     needs: install-runner
 
     steps:
       - run: hostname
       - run: ls -Al
+      # ... etc
 ```
 
 ## Inputs
