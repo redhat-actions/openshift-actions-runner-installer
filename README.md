@@ -30,6 +30,8 @@ You must have `helm` v3 and either `oc` or `kubectl` installed. You can use the 
 
 You do **not** need cluster administrator privileges to deploy the runners and run workloads. However, some images or tools may require special permissions.
 
+<a id="example-workflows"></a>
+
 ## Example Workflows
 Refer to the [**Repository Example**](./.github/workflows/repo_example.yml) and [**Organization Example**](./.github/workflows/org_example.yml). The Repository example is also an example of using a [`repository_dispatch` event](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#repository_dispatch) to trigger a separate workflow, once the runner is ready.
 
@@ -66,6 +68,8 @@ jobs:
       # ... etc
 ```
 
+<a id="inputs"></a>
+
 ## Inputs
 The only required input is the `github_pat`, which is a [Personal Access Token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token), with the appropriate permisions.
 
@@ -101,6 +105,7 @@ You can use the `helm_release_name` output to determine the helm release name to
 
 Refer to the [tear down example](./.github/workflows/tear_down_runners.yml) and the [organization workflow](./.github/workflows/org_example.yml) for examples.
 
+<a id="troubleshooting"></a>
 ## Troubleshooting
 
 See the Troubleshooting sections of [the chart README](https://github.com/redhat-actions/openshift-actions-runner-chart#Troubleshooting), and [the runner README](https://github.com/redhat-actions/openshift-actions-runner#Troubleshooting).
