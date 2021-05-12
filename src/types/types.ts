@@ -40,6 +40,7 @@ export interface RunnerConfiguration {
     helmChartVersion: string | undefined;
     helmExtraArgs: string[];
     helmReleaseName: string;
+    helmUninstallIfExists: boolean;
     githubPat: string;
     runnerLocation: RunnerLocation;
     runnerLabels: string[];
