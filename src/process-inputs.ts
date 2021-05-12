@@ -59,6 +59,8 @@ export default function processInputs(): RunnerConfiguration {
         helmChartVersion = undefined;
     }
 
+    const helmUninstallIfExists = core.getInput(Inputs.HELM_UNINSTALL_EXISTING) === "true";
+
     let namespace: string | undefined = core.getInput(Inputs.NAMESPACE);
     if (namespace === "") {
         namespace = undefined;
@@ -71,6 +73,7 @@ export default function processInputs(): RunnerConfiguration {
         helmChartVersion,
         helmExtraArgs,
         helmReleaseName,
+        helmUninstallIfExists,
         runnerImage,
         namespace,
         runnerLabels,

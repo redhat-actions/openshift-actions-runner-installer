@@ -3,12 +3,14 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  **************************************************************************************************/
 
+import * as core from "@actions/core";
 import * as io from "@actions/io";
 
 import exec from "./util/exec";
 import Constants from "./constants";
 import { RunnerConfiguration } from "./types/types";
 import getAndWaitForPods from "./wait-for-pods";
+import { splitByNewline } from "./util/util";
 
 enum HelmValueNames {
     RUNNER_IMAGE = "runnerImage",
@@ -23,21 +25,38 @@ enum HelmValueNames {
 export default async function runHelmInstall(config: RunnerConfiguration): Promise<string[]> {
     const helmPath = await io.which("helm", true);
 
+    const namespaceArgs = config.namespace ? [ "--namespace", config.namespace ] : [];
+    await exec(helmPath, [ "ls", ...namespaceArgs ]);
+
+    if (config.helmUninstallIfExists) {
+        core.info(`🔎 Checking if release ${config.helmReleaseName} already exists...`);
+
+        const releasesStr = await exec(helmPath, [ "ls", "-q", ...namespaceArgs ]);
+        const releases = splitByNewline(releasesStr.stdout);
+
+        if (releases.includes(config.helmReleaseName)) {
+            core.info(`ℹ️ Release ${config.helmReleaseName} already exists; removing.`);
+            await exec(helmPath, [ "uninstall", config.helmReleaseName, ...namespaceArgs ]);
+        }
+        else {
+            core.info(`Release ${config.helmReleaseName} does not exist.`);
+        }
+    }
+    else {
+        core.info(`Not checking if release already exists`);
+    }
+
     await exec(helmPath, [ "repo", "add", Constants.CHART_REPO_NAME, Constants.CHART_REPO_URL ]);
     await exec(helmPath, [ "repo", "list" ]);
     await exec(helmPath, [ "repo", "update" ]);
     await exec(helmPath, [ "search", "repo", Constants.CHART_NAME ]);
 
-    const namespaceArgs = config.namespace ? [ "--namespace", config.namespace ] : [];
-
     await exec(helmPath, [ "version" ]);
-    await exec(helmPath, [ "ls", ...namespaceArgs ]);
 
     const versionArgs = config.helmChartVersion ? [ "--version", config.helmChartVersion ] : [];
 
-    const helmUpgradeArgs: string[] = [
-        "upgrade",
-        "--install",
+    const helmInstallCmd: string[] = [
+        "install",
         // "--debug",
         config.helmReleaseName,
         Constants.CHART_REPO_NAME + "/" + Constants.CHART_NAME,
@@ -51,7 +70,7 @@ export default async function runHelmInstall(config: RunnerConfiguration): Promi
     ];
 
     if (config.runnerLocation.repository) {
-        helmUpgradeArgs.push(
+        helmInstallCmd.push(
             "--set-string", `${HelmValueNames.GITHUB_REPO}=${config.runnerLocation.repository}`
         );
     }
@@ -61,14 +80,14 @@ export default async function runHelmInstall(config: RunnerConfiguration): Promi
         // Do not put spaces after the comma -
         // it works locally because the chart trims the spaces but it works differently in actions/exec for some reason
         const labelsStringified = `{ ${config.runnerLabels.join("\\,")} }`;
-        helmUpgradeArgs.push("--set", `${HelmValueNames.RUNNER_LABELS}=${labelsStringified}`);
+        helmInstallCmd.push("--set", `${HelmValueNames.RUNNER_LABELS}=${labelsStringified}`);
     }
 
     if (config.helmExtraArgs.length > 0) {
-        helmUpgradeArgs.push(...config.helmExtraArgs);
+        helmInstallCmd.push(...config.helmExtraArgs);
     }
 
-    await exec(helmPath, helmUpgradeArgs);
+    await exec(helmPath, helmInstallCmd);
     await exec(helmPath, [ "get", "manifest", config.helmReleaseName, ...namespaceArgs ], { group: true });
 
     return getAndWaitForPods(config.helmReleaseName, config.runnerReplicas, config.namespace);

@@ -73,7 +73,7 @@ export async function waitForRunnersToBeOnline(
     const noRunnerErrMsg = `Not all of the new runners were added to ${runnerLocation}, or were not online `
         + `within ${WAIT_FOR_RUNNERS_TIMEOUT}s. Check if the pods failed to start, or exited.`;
 
-    core.info(`Waiting for the new runners to come up: ${joinList(newRunnerNames, "and")}`);
+    core.info(`⏳ Waiting for the new runners to come up: ${joinList(newRunnerNames, "and")}`);
 
     const newOnlineRunners: string[] = [];
     const newOfflineRunners: string[] = [];

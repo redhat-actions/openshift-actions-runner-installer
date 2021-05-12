@@ -14,7 +14,7 @@ export enum Inputs {
      */
     HELM_CHART_VERSION = "helm_chart_version",
     /**
-     * Any other arguments to pass to the 'helm upgrade --install' command.
+     * Any other arguments to pass to the 'helm install' command.
      * Separate arguments by newline. Do not use quotes - @actions/exec will do the quoting for you.
      * Required: false
      * Default: None.
@@ -26,6 +26,13 @@ export enum Inputs {
      * Default: None.
      */
     HELM_RELEASE_NAME = "helm_release_name",
+    /**
+     * Uninstall any release that matches the `helm_release_name` and `namespace` before running `helm install`.
+     * If this is false, and the release exists, the action will fail when the `helm install` fails.
+     * Required: false
+     * Default: "true"
+     */
+    HELM_UNINSTALL_EXISTING = "helm_uninstall_existing",
     /**
      * Optional namespace (aka project) to pass to all Helm or Kubernetes commands.
      * Required: false
@@ -69,8 +76,8 @@ export enum Inputs {
 
 export enum Outputs {
     /**
-     * The name of the Helm release that was created/upgraded.
-     * If a matching runner was already present, the Helm upgrade is skipped, and this value is undefined.
+     * The name of the Helm release that was created.
+     * If a matching runner was already present, the Helm install is skipped, and this value is undefined.
      * Required: false
      * Default: None.
      */

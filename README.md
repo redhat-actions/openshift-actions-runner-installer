@@ -82,14 +82,15 @@ Note that the default workflow token `secrets.GITHUB_TOKEN` does **not** have th
 | runner_location | Repository or organization for the self-hosted runner. | Workflow repository |
 | runner_replicas | Number of replicas of the container to create. Each replica is its own pod, and its own runner. | 1
 | namespace | Optional Kubernetes namespace to pass to all Helm and Kube client comands.  | None |
+| helm_release_name | The Helm release name to use. | Runner location (repo or org) |
+| helm_uninstall_existing | Uninstall any release that matches the `helm_release_name` and `namespace` before running `helm install`. If this is false, and the release exists, the action will fail when the `helm install` fails. | `true` |
 | helm_chart_version | Version of our [Helm Chart](https://github.com/redhat-actions/openshift-actions-runner-chart) to install. | Latest release
-| helm_extra_args | Arbitrary arguments to append to the <code>helm&nbsp;upgrade&nbsp;‑‑install</code> command. Refer to the [Chart README](https://github.com/redhat-actions/openshift-actions-runner-chart). <br>Separate items by newline. Do not quote the arguments, since `@actions/exec` manages quoting. | None |
-| helm_release_name | The Helm release name to use. | Runner location |
+| helm_extra_args | Arbitrary arguments to append to the `helm` command. Refer to the [Chart README](https://github.com/redhat-actions/openshift-actions-runner-chart). <br>Separate items by newline. Do not quote the arguments, since `@actions/exec` manages quoting. | None |
 
 ## Outputs
 | Output Name | Description |
 | ----------- | ----------- |
-| helm_release_name | The name of the Helm release that was created or upgraded.<br>If the runners were present and the upgrade was skipped, this value is undefined. |
+| helm_release_name | The name of the Helm release that was installed.<br>If the runners were present and the install was skipped, this value is undefined. |
 | installed | Boolean value indicating if the runners were installed (`true`), or already present (`false`). |
 | runners | JSON-parsable array of the matching runners' names, whether they were installed by this action or already present. |
 

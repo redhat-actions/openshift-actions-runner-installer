@@ -32,10 +32,6 @@ jobs:
 
           helm_release_name: node-runner
 
-          # This runner will be added to this repository.
-          # The current workflow's repository is the default, so we can omit this input.
-          runner_location: redhat-actions/openshift-actions-runner-installer
-
           # Give the runner these two labels (which are required by the workflow below)
           runner_labels: node
 

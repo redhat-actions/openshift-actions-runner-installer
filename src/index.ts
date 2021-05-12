@@ -18,7 +18,7 @@ export async function run(): Promise<void> {
 
     const taggedImage = `${runnerConfig.runnerImage}:${runnerConfig.runnerTag}`;
 
-    core.info(`Fetching self-hosted runners for ${runnerConfig.runnerLocation}`);
+    core.info(`🔎 Fetching self-hosted runners for ${runnerConfig.runnerLocation}`);
 
     const matchingOnlineRunners = await getMatchingOnlineRunners(
         // We label our runners with the taggedImage so that runner using the wrong image are not counted.
@@ -55,7 +55,7 @@ export async function run(): Promise<void> {
 
     const plural = newRunners.length !== 1;
     core.info(
-        `Success: new self-hosted runner${plural ? "s" : ""} `
+        `✅ Success: new self-hosted runner${plural ? "s" : ""} `
         + `${joinList(newRunners)} ${plural ? "are" : "is"} up and running.`
     );
 
