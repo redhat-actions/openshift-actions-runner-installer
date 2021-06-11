@@ -19,6 +19,7 @@ jobs:
         with:
           openshift_server_url: ${{ secrets.OPENSHIFT_URL }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
           insecure_skip_tls_verify: true
 
       - run: helm ls

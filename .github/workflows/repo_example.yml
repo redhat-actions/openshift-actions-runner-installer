@@ -39,7 +39,7 @@ jobs:
           runner_image: quay.io/redhat-github-actions/node-runner-14
 
           # Use this tag for the runner_image
-          runner_tag: v1.0.0
+          runner_tag: v1
 
           # Create 2 replicas so we can run jobs in parallel
           runner_replicas: 2

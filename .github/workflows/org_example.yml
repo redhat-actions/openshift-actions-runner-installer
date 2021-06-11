@@ -45,7 +45,7 @@ jobs:
           runner_image: quay.io/redhat-github-actions/java-runner-11
 
           # Use this tag for the runner_image
-          runner_tag: v1.0.0
+          runner_tag: v1
 
           # Give the runner these two labels (which are required by the workflow below)
           runner_labels: java, org

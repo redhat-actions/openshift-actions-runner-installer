@@ -5,7 +5,7 @@
 
 namespace Constants {
     export const DEFAULT_IMG = "quay.io/redhat-github-actions/runner";
-    export const DEFAULT_IMG_TAG = "v1.0.0";
+    export const DEFAULT_IMG_TAG = "v1";
 
     export const CHART_REPO_NAME = "openshift-actions-runner-chart";
     export const CHART_NAME = "actions-runner";

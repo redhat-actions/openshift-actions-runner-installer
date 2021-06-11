@@ -81,7 +81,7 @@ Note that the default workflow token `secrets.GITHUB_TOKEN` does **not** have th
 | ---------- | ----------- | ------- |
 | github_pat | GitHub Personal access token. Refer to the description above. | **Must be provided**
 | runner_image | Container image to use for the runner. | [`quay.io/redhat-github-actions/runner`](https://quay.io/redhat-github-actions/runner)
-| runner_tag | Tag to use for the runner container image. | `v1.0.0` |
+| runner_tag | Tag to use for the runner container image. | `v1` |
 | runner_labels | [Labels](https://docs.github.com/en/actions/hosting-your-own-runners/using-labels-with-self-hosted-runners) to add to the self-hosted runner. Must be comma-separated, spaces after commas optional. | None |
 | runner_location | Repository or organization for the self-hosted runner. | Workflow repository |
 | runner_replicas | Number of replicas of the container to create. Each replica is its own pod, and its own runner. | 1
