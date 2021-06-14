@@ -20,7 +20,7 @@ const JSONPATH_DEPLOY_REPLICAS = `jsonpath={.items[*].status.availableReplicas}{
 // eslint-disable-next-line max-len
 const JSONPATH_CONTAINER_READY = `jsonpath={range .items[*]}{"podName="}{.metadata.name}{" containerName="}{.status.containerStatuses[0].name}{" ready="}{.status.containerStatuses[0].ready}{"\\n"}{end}`;
 
-const DEPLOYMENT_READY_TIMEOUT_S = 60;
+const DEPLOYMENT_READY_TIMEOUT_S = 120;
 
 export default async function getAndWaitForPods(
     releaseName: string, desiredNoReplicas: string, namespace?: string
