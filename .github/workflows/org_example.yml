@@ -6,9 +6,6 @@ on:
     # nightly 10pm. note this workflow cleans up after itself
     - cron: "0 22 * * *"
 
-env:
-  TEAR_DOWN_RUNNERS: true
-
 jobs:
   install-org-runner:
     runs-on: ubuntu-20.04
@@ -47,8 +44,8 @@ jobs:
           # Use this tag for the runner_image
           runner_tag: v1
 
-          # Give the runner these two labels (which are required by the workflow below)
-          runner_labels: java, org
+          # Give the runner these labels (which are required by the workflow below)
+          runner_labels: openshift, java
 
           # Create 2 replicas so we can run jobs in parallel
           runner_replicas: 2
@@ -69,12 +66,36 @@ jobs:
           echo "${{ toJSON(steps.install-runners.outputs) }}"
 
   test-org-selfhosted:
-    name: Self Hosted Java Workflow
-    runs-on: [ self-hosted, java, org ]
+    name: Self Hosted Quarkus Build and Test
+    runs-on: [ self-hosted, java ]
     needs: install-org-runner
+    defaults:
+      run:
+        working-directory: getting-started
+
+    env:
+      WORKDIR: getting-started
 
     steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: redhat-actions/quarkus-quickstarts
+
       - run: java --version
+
+      # https://github.com/redhat-actions/quarkus-quickstarts/tree/master/getting-started#readme
+
+      # Build, test, and upload our executable jars.
+      - run: ./mvnw install -ntp
+        working-directory: ${{ env.WORKDIR }}
+
+      - run: ./mvnw test
+        working-directory: ${{ env.WORKDIR }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: app-jar-files.zip
+          path: ${{ env.WORKDIR }}/target/*.jar
 
   teardown-org-runner:
     name: Tear down self-hosted runners
@@ -91,5 +112,6 @@ jobs:
           insecure_skip_tls_verify: true
 
       - run: helm ls
+
       - name: Clean up self-hosted runners
         run: helm uninstall ${{ needs.install-org-runner.outputs.helm_release_name }}
