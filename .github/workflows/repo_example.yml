@@ -34,7 +34,7 @@ jobs:
           # This token has 'repo' permissions
           github_pat: ${{ secrets.REPO_TOKEN }}
 
-          helm_release_name: node-runner
+          helm_release_name: node-${{ matrix.runner_tag }}-runner
 
           # Give the runner these two labels (which are required by the workflow below)
           runner_labels: node
