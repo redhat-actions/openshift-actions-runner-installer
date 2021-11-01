@@ -45,6 +45,9 @@ jobs:
           # Use this tag for the runner_image
           runner_tag: ${{ matrix.runner_tag }}
 
+          helm_extra_args: |
+            --set-string secretName=github-pat-repo-${{ matrix.runner_tag }}
+
           # Create 2 replicas so we can run jobs in parallel
           runner_replicas: 2
 
