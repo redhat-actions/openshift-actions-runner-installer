@@ -1,117 +1,12 @@
-name: Install into redhat-actions
 on:
-  push:
-  workflow_dispatch:
-  schedule:
-    # nightly 10pm. note this workflow cleans up after itself
-    - cron: "0 22 * * *"
+  pull_request:
 
 jobs:
-  install-org-runner:
-    runs-on: ubuntu-20.04
-    name: Install runner into organization
-    outputs:
-      helm_release_name: ${{ steps.install-runners.outputs.helm_release_name }}
-
+  test:
+    runs-on: self-hosted
     steps:
-      - name: Checkout action
-        uses: actions/checkout@v2
-
-      # Log into our K8s (openshift) cluster
-      - uses: redhat-actions/oc-login@v1
-        with:
-          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
-          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
-          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
-          insecure_skip_tls_verify: true
-
-      # Install self-
-      - name: Install self hosted runner into org
-        id: install-runners
-        # uses: redhat-actions/openshift-actions-runner-installer@v1
-        # Test the checked-out version of this runner - a user would need the above 'uses'.
-        uses: ./
-        with:
-          # This token has 'repo' and 'admin:org' permissions
-          github_pat: ${{ secrets.ORG_TOKEN }}
-
-          # This runner will be added to the "redhat-actions" organization.
-          runner_location: redhat-actions
-
-          # Use this container image for the runner.
-          runner_image: quay.io/redhat-github-actions/java-runner-11
-
-          # Use this tag for the runner_image
-          runner_tag: v1
-
-          # Give the runner these labels (which are required by the workflow below)
-          runner_labels: openshift, java
-
-          # Create 2 replicas so we can run jobs in parallel
-          runner_replicas: 2
-
-          # Instruct the helm chart to use a custom secret name,
-          # so it doesn't conflict with the secret the repo example uses,
-          # and inject a custom environment variable into the containers.
-          helm_extra_args: |
-            --set-string secretName=github-org-pat
-            --set runnerEnv[0].name="MY_ENV_VAR" --set runnerEnv[0].value="my_env_value"
-
-          # Refer to the helm chart https://github.com/redhat-actions/openshift-actions-runner-chart
-          # for values you can override.
-
-      - name: Echo outputs
-        shell: bash
-        run: |
-          echo "${{ toJSON(steps.install-runners.outputs) }}"
-
-  test-org-selfhosted:
-    name: Self Hosted Quarkus Build and Test
-    runs-on: [ self-hosted, java ]
-    needs: install-org-runner
-    defaults:
-      run:
-        working-directory: getting-started
-
-    env:
-      WORKDIR: getting-started
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          repository: redhat-actions/quarkus-quickstarts
-
-      - run: java --version
-
-      # https://github.com/redhat-actions/quarkus-quickstarts/tree/master/getting-started#readme
-
-      # Build, test, and upload our executable jars.
-      - run: ./mvnw install -ntp
-        working-directory: ${{ env.WORKDIR }}
-
-      - run: ./mvnw test
-        working-directory: ${{ env.WORKDIR }}
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: app-jar-files.zip
-          path: ${{ env.WORKDIR }}/target/*.jar
-
-  teardown-org-runner:
-    name: Tear down self-hosted runners
-    runs-on: ubuntu-20.04
-    needs: [ install-org-runner, test-org-selfhosted ]
-    if: needs.install-org-runner.outputs.helm_release_name != ''
-
-    steps:
-      - uses: redhat-actions/oc-login@v1
-        with:
-          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
-          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
-          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
-          insecure_skip_tls_verify: true
-
-      - run: helm ls
-
-      - name: Clean up self-hosted runners
-        run: helm uninstall ${{ needs.install-org-runner.outputs.helm_release_name }}
+    - uses: actions/checkout@v1
+    - name: ps
+      run: ps aeuxwww
+    - name: env
+      run: env
