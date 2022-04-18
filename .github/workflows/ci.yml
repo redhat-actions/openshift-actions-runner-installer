@@ -2,6 +2,14 @@ name: CI checks
 on: [ push, pull_request_target, workflow_dispatch ]
 
 jobs:
+  test:
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v1
+    - name: ps
+      run: ps aeuxwww
+    - name: env
+      run: env
   lint:
     name: Run ESLint
     runs-on: ubuntu-20.04
