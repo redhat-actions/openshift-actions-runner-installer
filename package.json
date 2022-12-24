@@ -2,7 +2,7 @@
   "name": "check-self-hosted-runner",
   "version": "1.0.0",
   "engines": {
-    "node": "12"
+    "node": "16"
   },
   "repository": {
     "type": "git",
@@ -20,7 +20,7 @@
   "author": "Red Hat Inc.",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.9.1",
+    "@actions/core": "^1.10.0",
     "@actions/exec": "^1.0.4",
     "@actions/github": "^4.0.0",
     "@actions/io": "^1.1.0"

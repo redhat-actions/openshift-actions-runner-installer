@@ -62,5 +62,5 @@ outputs:
   runners:
     description: JSON-parseable array of the runner names, whether they were installed or not.
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'dist/index.js'
