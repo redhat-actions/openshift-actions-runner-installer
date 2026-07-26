@@ -6,6 +6,11 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "deps"
+    ignore:
+      # typescript-eslint@8.x requires typescript <6.1.0
+      # Wait for typescript-eslint to support TS 7 before upgrading
+      - dependency-name: "typescript"
+        versions: [">=7.0.0"]
     groups:
       actions-toolkit:
         patterns:
