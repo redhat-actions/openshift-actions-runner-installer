@@ -71,8 +71,8 @@ export default async function getAndWaitForPods(
                         podName, containerName, ready,
                     };
                 })
-                // filter out the ones that succeeded
-                .filter((podStatusObj) => podStatusObj.ready);
+                // filter out the ones that are ready (keep only not-ready pods)
+                .filter((podStatusObj) => podStatusObj.ready !== "true");
 
             if (notReadyPods.length > 0) {
                 for (const notReadyPod of notReadyPods) {

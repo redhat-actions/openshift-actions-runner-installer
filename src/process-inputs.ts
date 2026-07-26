@@ -104,7 +104,7 @@ export function validateResourceName(name: string): string {
     if (!nameWithReplacements.match(/^[a-z0-9-]+$/)) {
         throw new Error(
             `Helm release name "${name}" contains illegal characters. `
-            + `Can only container lowercase letters, numbers, and '-'.`
+            + `Can only contain lowercase letters, numbers, and '-'.`
         );
     }
     if (!nameWithReplacements.match(/^[a-z]/) || !nameWithReplacements.match(/[a-z]$/)) {
