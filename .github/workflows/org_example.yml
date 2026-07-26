@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout action
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Log into our K8s (openshift) cluster
       - uses: redhat-actions/oc-login@v2
@@ -76,7 +76,7 @@ jobs:
       WORKDIR: getting-started
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: redhat-actions/quarkus-quickstarts
 
