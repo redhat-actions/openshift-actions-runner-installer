@@ -47,15 +47,17 @@ export function awaitWithRetry<T = void>(
     core.startGroup(groupName);
 
     return new Promise<T>((resolve, reject) => {
-        interval = setInterval(async () => {
-            await executor(resolve, reject);
+        interval = setInterval(() => {
+            void (async (): Promise<void> => {
+                await executor(resolve, reject);
 
-            if (tries > maxTries) {
-                reject(new Error(errMsg));
-                return;
-            }
+                if (tries > maxTries) {
+                    reject(new Error(errMsg));
+                    return;
+                }
 
-            tries++;
+                tries++;
+            })();
         },
         delayS * 1000);
     }).finally(() => {

@@ -10,9 +10,9 @@ import RunnerLocation from "./runner-location";
 export type Octokit = InstanceType<typeof GitHub>;
 
 interface SelfHostedRunnerLabel {
-    id: number;
+    id?: number;
     name: string;
-    type: string;
+    type?: string;
 }
 
 export interface SelfHostedRunner {
@@ -27,7 +27,6 @@ export interface SelfHostedRunner {
 // https://docs.github.com/en/rest/reference/actions#list-self-hosted-runners-for-an-organization
 // https://docs.github.com/en/rest/reference/actions#list-self-hosted-runners-for-a-repository
 export interface SelfHostedRunnersResponse {
-    // eslint-disable-next-line camelcase
     total_count: number;
     runners: SelfHostedRunner[];
 }

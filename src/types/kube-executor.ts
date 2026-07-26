@@ -8,7 +8,7 @@ import * as io from "@actions/io";
 import exec from "../util/exec";
 
 export async function getKubeCommandExecutor(
-    labelSelector?: string | undefined, namespace?: string | undefined
+    labelSelector?: string, namespace?: string
 ): Promise<KubeCommandExecutor> {
     const kubeClientPath = await getKubeClientPath();
 
@@ -50,7 +50,6 @@ export class KubeCommandExecutor {
         this.labelSelectorArg = labelSelector ? [ "--selector", labelSelector ] : [];
     }
 
-    /* eslint-disable @typescript-eslint/typedef */
     public async logs(podName: string, containerName?: string, group = false): Promise<string> {
         const containerNameArg = containerName ? [ containerName ] : [];
 
@@ -76,7 +75,6 @@ export class KubeCommandExecutor {
     }
 
     private async view(
-        // eslint-disable-next-line @typescript-eslint/typedef
         operation: "get" | "describe", resourceType: KubeResourceType, outputFormat?: string, group = false,
     ): Promise<string> {
         const outputArg = outputFormat ? [ "--output", outputFormat ] : [];

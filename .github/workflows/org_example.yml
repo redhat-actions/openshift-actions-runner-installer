@@ -6,16 +6,19 @@ on:
     # nightly 10pm. note this workflow cleans up after itself
     - cron: "0 22 * * *"
 
+permissions:
+  contents: read
+
 jobs:
   install-org-runner:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     name: Install runner into organization
     outputs:
       helm_release_name: ${{ steps.install-runners.outputs.helm_release_name }}
 
     steps:
       - name: Checkout action
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       # Log into our K8s (openshift) cluster
       - uses: redhat-actions/oc-login@v1
@@ -25,7 +28,7 @@ jobs:
           namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
           insecure_skip_tls_verify: true
 
-      # Install self-
+      # Install self-hosted runner
       - name: Install self hosted runner into org
         id: install-runners
         # uses: redhat-actions/openshift-actions-runner-installer@v1
@@ -77,7 +80,7 @@ jobs:
       WORKDIR: getting-started
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           repository: redhat-actions/quarkus-quickstarts
 
@@ -92,14 +95,14 @@ jobs:
       - run: ./mvnw test
         working-directory: ${{ env.WORKDIR }}
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: app-jar-files.zip
           path: ${{ env.WORKDIR }}/target/*.jar
 
   teardown-org-runner:
     name: Tear down self-hosted runners
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     needs: [ install-org-runner, test-org-selfhosted ]
     if: needs.install-org-runner.outputs.helm_release_name != ''
 

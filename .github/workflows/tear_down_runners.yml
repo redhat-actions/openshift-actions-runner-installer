@@ -7,10 +7,13 @@ on:
     # nightly 1030pm since the repo_example runs at 10
     - cron: "0 22 30 * *"
 
+permissions:
+  contents: read
+
 jobs:
   tear-down-runners:
     name: Tear down repository runners
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     env:
       HELM_RELEASE_NAME: "node-runner"
 
