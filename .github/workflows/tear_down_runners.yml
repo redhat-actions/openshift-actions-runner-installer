@@ -1,11 +1,6 @@
 name: Tear down repository runners
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [ teardown_runners ]
-  schedule:
-    # nightly 1030pm since the repo_example runs at 10
-    - cron: "0 22 30 * *"
 
 permissions:
   contents: read

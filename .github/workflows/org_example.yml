@@ -1,10 +1,6 @@
 name: Install into redhat-actions
 on:
-  push:
   workflow_dispatch:
-  schedule:
-    # nightly 10pm. note this workflow cleans up after itself
-    - cron: "0 22 * * *"
 
 permissions:
   contents: read
