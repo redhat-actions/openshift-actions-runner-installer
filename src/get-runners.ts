@@ -65,7 +65,7 @@ export async function getMatchingOnlineRunners(
     return matchingOnlineRunners;
 }
 
-const WAIT_FOR_RUNNERS_TIMEOUT = 60;
+const WAIT_FOR_RUNNERS_TIMEOUT = 180;
 
 export async function waitForRunnersToBeOnline(
     githubPat: string, runnerLocation: RunnerLocation, newRunnerNames: string[]
@@ -76,9 +76,10 @@ export async function waitForRunnersToBeOnline(
     core.info(`⏳ Waiting for the new runners to come up: ${joinList(newRunnerNames, "and")}`);
 
     const newOnlineRunners: string[] = [];
-    const newOfflineRunners: string[] = [];
+    // Track runners we've seen in a non-online state so we only log once per status
+    const seenOfflineRunners = new Set<string>();
 
-    return awaitWithRetry<string[]>(
+    const result = await awaitWithRetry<string[]>(
         WAIT_FOR_RUNNERS_TIMEOUT, 5,
         `Waiting for runners to come online...`, noRunnerErrMsg,
         async (resolve) => {
@@ -91,15 +92,13 @@ export async function waitForRunnersToBeOnline(
                 core.info(`${runnerLocation.toString()} has no runners.`);
             }
 
-            // const currentGHRunnerNames = currentGHRunners.runners.map((runner) => runner.name);
-
-            // collect the runners that have not yet appeared as online or offline
+            // collect the runners that have not yet come online
             const unresolvedRunners = newRunnerNames.filter(
-                (newRunner) => !newOnlineRunners.includes(newRunner) && !newOfflineRunners.includes(newRunner)
+                (newRunner) => !newOnlineRunners.includes(newRunner)
             );
 
             if (unresolvedRunners.length === 0) {
-                // all runners have been accounted for
+                // all runners have come online
                 resolve(newOnlineRunners);
             }
             else {
@@ -114,21 +113,30 @@ export async function waitForRunnersToBeOnline(
 
                 if (newRunnerIndex !== -1) {
                     const newRunner = currentGHRunners.runners[newRunnerIndex];
-                    // if the runner is online, we are good and we return it
                     if (newRunner.status === "online") {
                         core.info(`✅ ${newRunner.name} is online`);
                         newOnlineRunners.push(newRunner.name);
                     }
-                    // else, we have to log a warning, because this usually means the runner configured but then crashed
-                    // but, only log one warning per runner.
-                    else if (!newOfflineRunners.includes(newRunner.name)) {
-                        core.warning(`New runner ${newRunner.name} connected to GitHub but is ${newRunner.status}`);
-                        newOfflineRunners.push(newRunner.name);
+                    // Runner appeared but isn't online yet -- log once per runner
+                    // as info (not warning) since this is normal during startup.
+                    // Keep polling; it may come online on a subsequent check.
+                    else if (!seenOfflineRunners.has(newRunner.name)) {
+                        core.info(`${newRunner.name} connected to GitHub but is ${newRunner.status}, waiting...`);
+                        seenOfflineRunners.add(newRunner.name);
                     }
                 }
             });
         }
     );
+
+    // After polling completes, warn about any runners that never came online
+    for (const runnerName of seenOfflineRunners) {
+        if (!newOnlineRunners.includes(runnerName)) {
+            core.warning(`Runner ${runnerName} connected to GitHub but never reached online status`);
+        }
+    }
+
+    return result;
 }
 
 async function listSelfHostedRunners(
