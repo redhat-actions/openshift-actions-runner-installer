@@ -1,13 +1,11 @@
 # OpenShift Actions Runner Installer
 
-[![Install into repository](https://github.com/redhat-actions/openshift-actions-runner-installer/workflows/Install%20into%20repository/badge.svg)](https://github.com/redhat-actions/openshift-actions-runner-installer/actions)
-[![Install into org](https://github.com/redhat-actions/openshift-actions-runner-installer/workflows/Install%20into%20redhat-actions/badge.svg)](https://github.com/redhat-actions/openshift-actions-runner-installer/actions)
 [![CI checks](https://github.com/redhat-actions/openshift-actions-runner-installer/workflows/CI%20Checks/badge.svg)](https://github.com/redhat-actions/openshift-actions-runner-installer/actions)
 [![Link checker](https://github.com/redhat-actions/openshift-actions-runner-installer/workflows/Link%20checker/badge.svg)](https://github.com/redhat-actions/openshift-actions-runner-installer/actions)
 
 [![awesome-runners](https://img.shields.io/badge/listed%20on-awesome--runners-blue.svg)](https://github.com/jonico/awesome-runners)
 [![tag badge](https://img.shields.io/github/v/tag/redhat-actions/openshift-actions-runner-installer)](https://github.com/redhat-actions/openshift-actions-runner-installer/tags)
-[![license badge](https://img.shields.io/github/license/redhat-actions/kn-service-deploy)](./LICENSE)
+[![license badge](https://img.shields.io/github/license/redhat-actions/openshift-actions-runner-installer)](./LICENSE)
 
 The OpenShift Self-Hosted Actions Runner Installer is a GitHub Action to automatically install self-hosted Actions runner containers into a Kubernetes cluster.
 
@@ -46,11 +44,11 @@ on: [ push, workflow_dispatch ]
 
 jobs:
   install-runner:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Install runner
     steps:
       - name: Install self hosted runner into this repository
-        uses: redhat-actions/openshift-actions-runner-installer@v1
+        uses: redhat-actions/openshift-actions-runner-installer@v2
         with:
           github_pat: ${{ secrets.PAT }}
 
@@ -85,7 +83,7 @@ Note that the default workflow token `secrets.GITHUB_TOKEN` does **not** have th
 | runner_labels | [Labels](https://docs.github.com/en/actions/hosting-your-own-runners/using-labels-with-self-hosted-runners) to add to the self-hosted runner. Must be comma-separated, spaces after commas optional. | None |
 | runner_location | Repository or organization for the self-hosted runner. | Workflow repository |
 | runner_replicas | Number of replicas of the container to create. Each replica is its own pod, and its own runner. | 1
-| namespace | Optional Kubernetes namespace to pass to all Helm and Kube client comands.  | None |
+| namespace | Optional Kubernetes namespace to pass to all Helm and Kube client commands. | None |
 | helm_release_name | The Helm release name to use. | Runner location (repo or org) |
 | helm_uninstall_existing | Uninstall any release that matches the `helm_release_name` and `namespace` before running `helm install`. If this is false, and the release exists, the action will fail when the `helm install` fails. | `true` |
 | helm_chart_version | Version of our [Helm Chart](https://github.com/redhat-actions/openshift-actions-runner-chart) to install. | Latest release
