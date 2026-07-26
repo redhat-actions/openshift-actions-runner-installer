@@ -18,7 +18,7 @@ export async function run(): Promise<void> {
 
     const taggedImage = `${runnerConfig.runnerImage}:${runnerConfig.runnerTag}`;
 
-    core.info(`🔎 Fetching self-hosted runners for ${runnerConfig.runnerLocation}`);
+    core.info(`🔎 Fetching self-hosted runners for ${runnerConfig.runnerLocation.toString()}`);
 
     const matchingOnlineRunners = await getMatchingOnlineRunners(
         // We label our runners with the taggedImage so that runner using the wrong image are not counted.
@@ -44,7 +44,7 @@ export async function run(): Promise<void> {
     core.info(`Installing a runner now.`);
 
     const installedRunnerPodnames = await installRunner(runnerConfig);
-    core.debug(`installedRunnerPodnames are ${installedRunnerPodnames}`);
+    core.debug(`installedRunnerPodnames are ${installedRunnerPodnames.join(", ")}`);
 
     // at present, the runner names == their hostnames === their pod names
     const newRunnerNames = installedRunnerPodnames;

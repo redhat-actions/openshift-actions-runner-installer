@@ -70,7 +70,7 @@ const WAIT_FOR_RUNNERS_TIMEOUT = 60;
 export async function waitForRunnersToBeOnline(
     githubPat: string, runnerLocation: RunnerLocation, newRunnerNames: string[]
 ): Promise<string[]> {
-    const noRunnerErrMsg = `Not all of the new runners were added to ${runnerLocation}, or were not online `
+    const noRunnerErrMsg = `Not all of the new runners were added to ${runnerLocation.toString()}, or were not online `
         + `within ${WAIT_FOR_RUNNERS_TIMEOUT}s. Check if the pods failed to start, or exited.`;
 
     core.info(`⏳ Waiting for the new runners to come up: ${joinList(newRunnerNames, "and")}`);
@@ -85,10 +85,10 @@ export async function waitForRunnersToBeOnline(
             const currentGHRunners = await listSelfHostedRunners(githubPat, runnerLocation);
             if (currentGHRunners.runners.length > 0) {
                 const runnersWithStatus = currentGHRunners.runners.map((runner) => `${runner.name} (${runner.status})`);
-                core.info(`${runnerLocation} runners are: ${joinList(runnersWithStatus)}`);
+                core.info(`${runnerLocation.toString()} runners are: ${joinList(runnersWithStatus)}`);
             }
             else {
-                core.info(`${runnerLocation} has no runners.`);
+                core.info(`${runnerLocation.toString()} has no runners.`);
             }
 
             // const currentGHRunnerNames = currentGHRunners.runners.map((runner) => runner.name);
@@ -134,7 +134,7 @@ export async function waitForRunnersToBeOnline(
 async function listSelfHostedRunners(
     githubPat: string, runnerLocation: RunnerLocation
 ): Promise<SelfHostedRunnersResponse> {
-    const octokit = await getOctokit(githubPat);
+    const octokit = getOctokit(githubPat);
 
     let response;
     try {
@@ -142,7 +142,7 @@ async function listSelfHostedRunners(
             // API Documentation:
             // https://docs.github.com/en/free-pro-team@latest/rest/reference/actions#self-hosted-runners
             // Octokit Documentation: https://octokit.github.io/rest.js/v17#actions-list-self-hosted-runners-for-repo
-            response = await octokit.actions.listSelfHostedRunnersForRepo({
+            response = await octokit.rest.actions.listSelfHostedRunnersForRepo({
                 owner: runnerLocation.owner,
                 repo: runnerLocation.repository,
             });
@@ -150,7 +150,7 @@ async function listSelfHostedRunners(
         else {
             // org only
             // Octokit Documentation: https://octokit.github.io/rest.js/v17#actions-list-self-hosted-runners-for-org
-            response = await octokit.actions.listSelfHostedRunnersForOrg({
+            response = await octokit.rest.actions.listSelfHostedRunnersForOrg({
                 org: runnerLocation.owner,
             });
         }
@@ -165,12 +165,12 @@ async function listSelfHostedRunners(
 }
 
 let cachedOctokit: Octokit | undefined;
-async function getOctokit(githubPat: string): Promise<Octokit> {
+function getOctokit(githubPat: string): Octokit {
     if (cachedOctokit) {
         return cachedOctokit;
     }
 
-    // Get authenticated GitHub client (Ocktokit): https://github.com/actions/toolkit/tree/master/packages/github#usage-
+    // Get authenticated GitHub client (Octokit): https://github.com/actions/toolkit/tree/master/packages/github#usage-
     const octokit: Octokit = github.getOctokit(githubPat);
     cachedOctokit = octokit;
     return octokit;
@@ -179,7 +179,6 @@ async function getOctokit(githubPat: string): Promise<Octokit> {
 /**
  * The errors messages from octokit HTTP requests can be poor; prepending the status code helps clarify the problem.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getBetterHttpError(err: any): Error {
     const status = err.status;
     if (status && err.message) {

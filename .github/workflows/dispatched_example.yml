@@ -4,6 +4,9 @@ on:
   repository_dispatch:
     types: [ runner_ready ]
 
+permissions:
+  contents: read
+
 jobs:
   test-selfhosted:
     runs-on: [ self-hosted ]

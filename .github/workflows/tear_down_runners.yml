@@ -1,21 +1,19 @@
 name: Tear down repository runners
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [ teardown_runners ]
-  schedule:
-    # nightly 1030pm since the repo_example runs at 10
-    - cron: "0 22 30 * *"
+
+permissions:
+  contents: read
 
 jobs:
   tear-down-runners:
     name: Tear down repository runners
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     env:
       HELM_RELEASE_NAME: "node-runner"
 
     steps:
-      - uses: redhat-actions/oc-login@v1
+      - uses: redhat-actions/oc-login@v2
         with:
           openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}

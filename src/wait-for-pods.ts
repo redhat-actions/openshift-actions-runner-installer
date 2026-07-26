@@ -17,7 +17,6 @@ const JSONPATH_DEPLOY_REPLICAS = `jsonpath={.items[*].status.availableReplicas}{
 
 // This outputs a line per pod, "<pod name> <container name> <container ready (boolean)>"
 // it only looks at the first container since we only have one per pod at this time
-// eslint-disable-next-line max-len
 const JSONPATH_CONTAINER_READY = `jsonpath={range .items[*]}{"podName="}{.metadata.name}{" containerName="}{.status.containerStatuses[0].name}{" ready="}{.status.containerStatuses[0].ready}{"\\n"}{end}`;
 
 const DEPLOYMENT_READY_TIMEOUT_S = 120;
@@ -52,8 +51,8 @@ export default async function getAndWaitForPods(
                 resolve();
             }
         }
-    ).catch(async (err) => {
-        core.warning(err);
+    ).catch(async (err: unknown) => {
+        core.warning(String(err));
         core.info(`🐞 Running debug commands...`);
 
         try {
@@ -72,8 +71,8 @@ export default async function getAndWaitForPods(
                         podName, containerName, ready,
                     };
                 })
-                // filter out the ones that succeeded
-                .filter((podStatusObj) => podStatusObj.ready);
+                // filter out the ones that are ready (keep only not-ready pods)
+                .filter((podStatusObj) => podStatusObj.ready !== "true");
 
             if (notReadyPods.length > 0) {
                 for (const notReadyPod of notReadyPods) {
@@ -85,8 +84,8 @@ export default async function getAndWaitForPods(
                 core.info(`The first container in all pods is Ready - not printing any container logs.`);
             }
         }
-        catch (debugErr) {
-            core.info(`Failed to print debug info: ${debugErr}`);
+        catch (debugErr: unknown) {
+            core.info(`Failed to print debug info: ${String(debugErr)}`);
         }
 
         throw err;
