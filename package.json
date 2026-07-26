@@ -16,7 +16,8 @@
     "bundle": "webpack --mode=production",
     "build": "npm run compile && npm run bundle",
     "clean": "rm -rf out/ dist/",
-    "lint": "eslint . --max-warnings=0"
+    "lint": "eslint . --max-warnings=0",
+    "test": "vitest run"
   },
   "keywords": [],
   "author": "Red Hat Inc.",
@@ -36,6 +37,7 @@
     "ts-loader": "^9.6.2",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.65.0",
+    "vitest": "^4.1.10",
     "webpack": "^5.109.0",
     "webpack-cli": "^7.2.1"
   }

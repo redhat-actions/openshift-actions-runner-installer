@@ -9,6 +9,7 @@ export default tseslint.config(
             "node_modules/",
             "webpack.config.js",
             "eslint.config.mjs",
+            "vitest.config.ts",
         ],
     },
     js.configs.recommended,
