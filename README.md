@@ -1,3 +1,15 @@
+> **This project is no longer actively maintained.** We recommend migrating to
+> [**Actions Runner Controller (ARC)**](https://github.com/actions/actions-runner-controller),
+> the official, GitHub-maintained solution for hosting self-hosted runners on Kubernetes.
+> ARC provides Kubernetes-native autoscaling, scale-from-zero capability, and active
+> community support.
+>
+> For more information, see the
+> [official documentation](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners-with-actions-runner-controller/about-actions-runner-controller).
+>
+> This action remains available for existing users, but it will not receive new features
+> or regular updates.
+
 # OpenShift Actions Runner Installer
 
 [![CI checks](https://github.com/redhat-actions/openshift-actions-runner-installer/workflows/CI%20Checks/badge.svg)](https://github.com/redhat-actions/openshift-actions-runner-installer/actions)
